@@ -146,7 +146,8 @@ button:hover {
 .btn-EliminarVehiculo,
 .btn-ConsultarVehiculo,
 .btn-consultarCliente,
-.btn-dashboard {
+.btn-dashboard,
+.btn-rol {
     display: inline-block;
     background-color: #6974f1;
     color: white;
@@ -156,7 +157,7 @@ button:hover {
 }
 .btn-Cerrar,
 .btn-volver,
-.btn-rol {
+.btn-volver-rol {
     display: inline-block;
     background-color: #ef4254;
     color: white;
