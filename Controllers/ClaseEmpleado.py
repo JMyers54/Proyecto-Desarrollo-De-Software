@@ -1,17 +1,18 @@
 from Controllers.ClaseAdmin import Admin
 
 class Empleado(Admin):
-    def __init__(self, IdEmpleado, Cedula, NombreEmpleado, Apellido, Telefono, Email ):
+    def __init__(self, IdEmpleado, Cedula, NombreEmpleado, Apellido, Telefono, Email, Contra ):
         self.__idEmpleado = IdEmpleado
         self.__Cedula = Cedula
         self.__NombreEmpleado = NombreEmpleado
         self.__Apellido = Apellido
         self.__Telefono = Telefono
         self.__Email = Email
+        self.__Contra = Contra
 
     @property
     def IdEmpleado(self):
-        return self.__idEmpleado_
+        return self.__IdEmpleado
     @property
     def Cedula(self):
         return super().Cedula
@@ -27,3 +28,6 @@ class Empleado(Admin):
     @property
     def Email(self):
         return super().Email
+    @property
+    def Contra(self):
+        return super().Contra

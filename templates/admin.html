@@ -12,7 +12,7 @@
     <header>
         <nav>
             <h1>Panel Administrador</h1>
-            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+            <a href="{{ url_for('logout') }}" class="btn-Cerrar">Cerrar Sesión</a>
         </nav>
     </header>
     <main>
@@ -20,7 +20,14 @@
             <h2>Bienvenido, Administrador</h2>
             <p>Desde aquí puedes gestionar empleados, vehículos y más.</p>
             <div class="acciones">
-                <a href="{{ url_for('registrar_form') }}" class="btn-accion">Registrar Empleado</a>
+                <a href="{{ url_for('registrar_form') }}" class="btn-crearEmpleado">Registrar Empleado</a>
+                <a href="#" class="btn-consultarEmpleado">Consultar Empleado</a>
+                <a href="#" class="btn-CrearVehiculo">Crear Vehículos</a>
+                <a href="#" class="btn-ActualizarVehiculo">Actualizar Vehículos</a>
+                <a href="#" class="btn-EliminarVehiculo">Eliminar Vehículos</a>
+                <a href="#" class="btn-ConsultarVehiculo">Consultar Vehículos</a>
+                <a href="#" class="btn-consultarCliente">Consultar Cliente</a>
+                <a href="#" class="btn-dashboard">Consultar Empleado</a>
                 <!-- Agregar más acciones aquí -->
             </div>
         </section>

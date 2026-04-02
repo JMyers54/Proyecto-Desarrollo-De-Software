@@ -9,7 +9,7 @@ body {
 }
 
 header {
-    background-color: #007bff;
+    background-color: #262627;
     color: white;
     padding: 1rem;
 }
@@ -27,7 +27,7 @@ nav h1 {
 .btn-login,
 .btn-rol,
 .btn-accion {
-    background-color: #28a745;
+    background-color: #6974f1;
     color: white;
     padding: 0.5rem 1rem;
     text-decoration: none;
@@ -38,7 +38,7 @@ nav h1 {
 .btn-login:hover,
 .btn-rol:hover,
 .btn-accion:hover {
-    background-color: #218838;
+    background-color: #6974f1;
 }
 
 main {
@@ -138,4 +138,29 @@ button:hover {
     gap: 1rem;
     margin-top: 1rem;
     flex-wrap: wrap;
+}
+.btn-crearEmpleado,
+.btn-consultarEmpleado,
+.btn-CrearVehiculo,
+.btn-ActualizarVehiculo,
+.btn-EliminarVehiculo,
+.btn-ConsultarVehiculo,
+.btn-consultarCliente,
+.btn-dashboard {
+    display: inline-block;
+    background-color: #6974f1;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration:none;
+}
+.btn-Cerrar,
+.btn-volver,
+.btn-rol {
+    display: inline-block;
+    background-color: #ef4254;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration:none;
 }

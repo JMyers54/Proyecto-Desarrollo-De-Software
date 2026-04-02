@@ -31,7 +31,7 @@ class Funciones():
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
-            sql = "INSERT INTO EMPLEADO (ID_EMPLEADO,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+            sql = "INSERT INTO EMPLEADO (IDEMPLEADO,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
             datos =(IdEmpleado,Cedula,Nombre,Apellido,Telefono,Email,Contra)
             cursor.execute(sql, datos)
             db.commit()
@@ -40,6 +40,22 @@ class Funciones():
             return True, "empleado registrado con éxito"
         except Exception as e:
             return False, f"Error al registrar empleado: {e}"
+
+    def RegistrarCliente(self,IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            sql = "INSERT INTO CLIENTE (ID_CLIENTE,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+            datos =(IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra)
+            cursor.execute(sql, datos)
+            db.commit()
+            cursor.close()
+            conexion.CerrarConnection()
+            return True, "Cliente registrado con éxito"
+        except Exception as e:
+            return False, f"Error al registrar cliente: {e}"
 
     def agregarVehiculo(self, id, marca, modelo, año, tipo, precio_diario, estado, imagen):
         pass
@@ -51,7 +67,7 @@ class Funciones():
             db = conexion.getConnection()
 
             with db.cursor() as cursor:
-                cursor.execute("SELECT Contra FROM empleado WHERE ID_EMPLEADO = %s", (id,))
+                cursor.execute("SELECT Contra FROM empleado WHERE IDEMPLEADO = %s", (id,))
                 resultado = cursor.fetchone()
             
             conexion.CerrarConnection()
