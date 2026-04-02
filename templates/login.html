@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - {{ rol.capitalize() }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <h1>Alquiler de Vehículos</h1>
+            <a href="{{ url_for('login') }}">Seleccionar Rol</a>
+        </nav>
+    </header>
+    <main>
+        <section class="login">
+            <h2>Iniciar Sesión como {{ rol.capitalize() }}</h2>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            <form method="POST">
+                <label for="id">ID:</label>
+                <input type="text" id="id" name="id" required>
+                <label for="contra">Contraseña:</label>
+                <input type="password" id="contra" name="contra" required>
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+        </section>
+    </main>
+</body>
+
+</html>

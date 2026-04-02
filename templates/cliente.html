@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Cliente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <h1>Panel Cliente</h1>
+            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+        </nav>
+    </header>
+    <main>
+        <section class="panel">
+            <h2>Bienvenido, Cliente</h2>
+            <p>Desde aquí puedes ver tus alquileres y reservar vehículos.</p>
+            <div class="acciones">
+                <a href="#" class="btn-accion">Ver Mis Alquileres</a>
+                <a href="#" class="btn-accion">Reservar Vehículo</a>
+                <!-- Agregar más acciones aquí -->
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alquiler de Vehículos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <h1>LJS Alquileres</h1>
+            <a href="{{ url_for('login') }}" class="btn-login">Iniciar Sesión</a>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h2>Bienvenido a nuestro Sistema de Alquiler</h2>
+            <p>Encuentra el vehículo perfecto para tus necesidades.</p>
+        </section>
+        <section class="catalogo">
+            <h3>Catálogo</h3>
+            <div class="vehiculos">
+                <div class="vehiculo">
+                    <h4>Toyota Corolla</h4>
+                    <p>Año: 2020</p>
+                    <p>Precio diario: $50</p>
+                </div>
+                <div class="vehiculo">
+                    <h4>Honda Civic ek9</h4>
+                    <p>Año: 2019</p>
+                    <p>Precio diario: $45</p>
+                </div>
+                <div class="vehiculo">
+                    <h4>Honda integra type R</h4>
+                    <p>Año: 2021</p>
+                    <p>Precio diario: $55</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

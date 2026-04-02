@@ -3,7 +3,7 @@ import mariadb as sql
 class ConexionDB():
     def __init__(self):
         self.__host = "localhost"
-        self.__port = 3306
+        self.__port = 3307
         self.__user = "root"
         self.__password = ""
         self.__database = "ALQUILER_VEHICULOS"

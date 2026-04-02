@@ -1,16 +1,9 @@
 from Models.ConexionDB import ConexionDB
-import os, shutil
-from Controllers.ClaseVehiculo import Vehiculo
-from tkinter import messagebox
+
 class Funciones():
     def __init__(self, vista, modelo):
         self.vista = vista
         self.modelo = modelo
-    
-    def EmpleadoRegistrado(self,):
-        Nombre = self.vista.EntryCedula.get()
-        Cedula = self.vista.EntryNombre.get()
-        Contra = self.vista.EntryContra.get()
 
     def IniciarSesionAdmin(self, id,contra):
         try:
@@ -19,31 +12,74 @@ class Funciones():
             db = conexion.getConnection()
 
             with db.cursor() as cursor:
-                cursor.execute("SELECT Contraseña FROM administrador WHERE id = %s",(id))
+                cursor.execute("SELECT Contraseña FROM admin WHERE id_admin = %s",(id,))
                 resultado = cursor.fetchone()
             
             conexion.CerrarConnection()
             if resultado is None:
-                print("El id no esta registrado.")
-                return False
+                return False, "El id no esta registrado."
             if resultado[0] == contra:
-                return True
+                return True, ""
             else:
-                print("Contraseña Incorrecta.")
-                return False
+                return False, "Contraseña Incorrecta."
         except Exception as e:
-            print(f"Error al iniciar sesión: {e}")
-            return False
-
-    def loginAdmin(self):
-        id = self.vista.EntryId.get()
-        contra = self.vista.EntryContra.get()
-        if self.IniciarSesionAdmin(id, contra):
-            self.vista.OpcioneAdmin()
-        else:
-            messagebox.showerror("Error","Cedula o Contraseña incorrecta.")
-
-
+            return False, f"Error al iniciar sesión: {e}"
+        
+    def RegistrarEmpleado(self,IdEmpleado,Cedula,Nombre,Apellido,Telefono,Email,Contra):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            sql = "INSERT INTO EMPLEADO (ID_EMPLEADO,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+            datos =(IdEmpleado,Cedula,Nombre,Apellido,Telefono,Email,Contra)
+            cursor.execute(sql, datos)
+            db.commit()
+            cursor.close()
+            conexion.CerrarConnection()
+            return True, "empleado registrado con éxito"
+        except Exception as e:
+            return False, f"Error al registrar empleado: {e}"
 
     def agregarVehiculo(self, id, marca, modelo, año, tipo, precio_diario, estado, imagen):
         pass
+
+    def verificarEmpleado(self, id, contra):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+
+            with db.cursor() as cursor:
+                cursor.execute("SELECT Contra FROM empleado WHERE ID_EMPLEADO = %s", (id,))
+                resultado = cursor.fetchone()
+            
+            conexion.CerrarConnection()
+            if resultado is None:
+                return False, "El id no está registrado."
+            if resultado[0] == contra:
+                return True, ""
+            else:
+                return False, "Contraseña Incorrecta."
+        except Exception as e:
+            return False, f"Error al iniciar sesión: {e}"
+
+    def verificarCliente(self, id, contra):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+
+            with db.cursor() as cursor:
+                cursor.execute("SELECT Contra FROM cliente WHERE ID_CLIENTE = %s", (id,))
+                resultado = cursor.fetchone()
+            
+            conexion.CerrarConnection()
+            if resultado is None:
+                return False, "El id no está registrado."
+            if resultado[0] == contra:
+                return True, ""
+            else:
+                return False, "Contraseña Incorrecta."
+        except Exception as e:
+            return False, f"Error al iniciar sesión: {e}"

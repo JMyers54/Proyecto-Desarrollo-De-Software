@@ -12,7 +12,7 @@ class ModeloLogin():
         cursor = conexion.cursor()
 
         query = """
-            SELECT * FROM empleado
+            SELECT * FROM admin
             WHERE IdAdmin = %s AND Contraseña = %s
             """
         
