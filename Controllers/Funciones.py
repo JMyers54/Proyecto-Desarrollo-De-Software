@@ -47,7 +47,7 @@ class Funciones():
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
-            sql = "INSERT INTO CLIENTE (ID_CLIENTE,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+            sql = "INSERT INTO CLIENTES (ID_CLIENTE,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
             datos =(IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra)
             cursor.execute(sql, datos)
             db.commit()
@@ -56,9 +56,6 @@ class Funciones():
             return True, "Cliente registrado con éxito"
         except Exception as e:
             return False, f"Error al registrar cliente: {e}"
-
-    def agregarVehiculo(self, id, marca, modelo, año, tipo, precio_diario, estado, imagen):
-        pass
 
     def verificarEmpleado(self, id, contra):
         try:
@@ -87,7 +84,7 @@ class Funciones():
             db = conexion.getConnection()
 
             with db.cursor() as cursor:
-                cursor.execute("SELECT Contra FROM cliente WHERE ID_CLIENTE = %s", (id,))
+                cursor.execute("SELECT Contra FROM clientes WHERE ID_CLIENTE = %s", (id,))
                 resultado = cursor.fetchone()
             
             conexion.CerrarConnection()
@@ -99,3 +96,7 @@ class Funciones():
                 return False, "Contraseña Incorrecta."
         except Exception as e:
             return False, f"Error al iniciar sesión: {e}"
+        
+
+    def agregarVehiculo(self, id, marca, modelo, año, tipo, precio_diario, estado, imagen):
+        pass

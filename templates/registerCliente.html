@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Empleado - Alquiler de Vehículos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #262627;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #3a3a3c;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 8px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #848489;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #6a6a6d;
+        }
+
+        .back-link {
+            text-align: center;
+        }
+
+        .back-link a {
+            color: #848489;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .flash {
+            color: #ffcccc;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Registro de Cliente</h1>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash">
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        <form method="post" action="/registrar_cliente">
+            <label for="IdCliente">ID Cliente:</label>
+            <input type="text" id="IdCliente" name="IdCliente" required>
+
+            <label for="Cedula">Cédula:</label>
+            <input type="text" id="Cedula" name="Cedula" required>
+
+            <label for="Nombre">Nombre:</label>
+            <input type="text" id="Nombre" name="Nombre" required>
+
+            <label for="Apellido">Apellido:</label>
+            <input type="text" id="Apellido" name="Apellido" required>
+
+            <label for="Telefono">Teléfono:</label>
+            <input type="text" id="Telefono" name="Telefono" required>
+
+            <label for="Email">Email:</label>
+            <input type="email" id="Email" name="Email" required>
+
+            <label for="Contra">Contraseña:</label>
+            <input type="password" id="Contra" name="Contra" required>
+
+            <button type="submit">Registrar</button>
+        </form>
+        <div class="back-link">
+            <a href="/admin" class="btn-volver">Volver al Panel</a>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -87,6 +87,31 @@ def registrar():
     else:
         return redirect(url_for('registrar_form'))
 
+@app.route("/registrar_cliente")
+def registrar_cliente():
+    if "empleado" not in session:
+        return redirect(url_for("login"))
+    return render_template("registerCliente.html")
+
+@app.route("/registrar_cliente", methods=["POST"])
+def registrar_clien():
+    if "empleado" not in session:
+        return redirect(url_for("login"))
+    IdCliente = request.form['IdCliente']
+    Cedula = request.form['Cedula']
+    Nombre = request.form['Nombre']
+    Apellido = request.form['Apellido']
+    Telefono = request.form['Telefono']
+    Email = request.form['Email']
+    Contra = request.form['Contra']
+    success, message = funciones.RegistrarCliente(IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra)
+    flash(message)
+    if success:
+        return redirect(url_for("empleado"))
+    else: 
+        return redirect(url_for("registrar_cliente"))
+    
+
 @app.route('/logout')
 def logout():
     session.pop('admin', None)
