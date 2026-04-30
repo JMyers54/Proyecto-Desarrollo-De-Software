@@ -1,12 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from Controllers.Funciones import Funciones
-from Models.ConexionDB import ConexionDB
+from DAL.Repository.AdminRepository import AdminRepository
+from DAL.Repository.EmpleadoRepository import EmpleadoRepository
+from DAL.Repository.ClienteRepository import ClienteRepository
+from DAL.Repository.VehiculoRepository import VehiculoRepository
+from DAL.Infrastructure.ConexionDB import ConexionDB
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='Presentation/templates', static_folder='Presentation/static')   
 app.secret_key = 'your_secret_key_here'  # Cambia esto por una clave secreta segura
 
 modelo = ConexionDB()
-funciones = Funciones(None, modelo)
+admin_repo = AdminRepository(None, modelo)
+empleado_repo = EmpleadoRepository(None, modelo)
+cliente_repo = ClienteRepository(None, modelo)
+vehiculo_repo = VehiculoRepository(None, modelo)
 
 @app.route('/')
 def index():
@@ -23,17 +29,17 @@ def login_rol(rol):
         contra = request.form['contra']
         
         if rol == 'admin':
-            success, message = funciones.IniciarSesionAdmin(id_user, contra)
+            success, message = admin_repo.IniciarSesionAdmin(id_user, contra)
             if success:
                 session['admin'] = id_user
                 return redirect(url_for('admin'))
         elif rol == 'empleado':
-            success, message = funciones.verificarEmpleado(id_user, contra)
+            success, message = empleado_repo.verificarEmpleado(id_user, contra)
             if success:
                 session['empleado'] = id_user
                 return redirect(url_for('empleado'))
         elif rol == 'cliente':
-            success, message = funciones.verificarCliente(id_user, contra)
+            success, message = cliente_repo.verificarCliente(id_user, contra)
             if success:
                 session['cliente'] = id_user
                 return redirect(url_for('cliente'))
@@ -67,7 +73,7 @@ def cliente():
 def registrar_form():
     if 'admin' not in session:
         return redirect(url_for('login'))
-    return render_template('register.html')
+    return render_template('registerEmpleado.html')
 
 @app.route('/registrar_empleado', methods=['POST'])
 def registrar():
@@ -80,7 +86,7 @@ def registrar():
     Telefono = request.form['Telefono']
     Email = request.form['Email']
     Contra = request.form['Contra']
-    success, message = funciones.RegistrarEmpleado(IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, Contra)
+    success, message = empleado_repo.RegistrarEmpleado(IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, Contra)
     flash(message)
     if success:
         return redirect(url_for('admin'))
@@ -104,7 +110,7 @@ def registrar_clien():
     Telefono = request.form['Telefono']
     Email = request.form['Email']
     Contra = request.form['Contra']
-    success, message = funciones.RegistrarCliente(IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra)
+    success, message = cliente_repo.RegistrarCliente(IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra)
     flash(message)
     if success:
         return redirect(url_for("empleado"))
