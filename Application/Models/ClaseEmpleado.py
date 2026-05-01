@@ -1,4 +1,4 @@
-from Controllers.ClaseAdmin import Admin
+from Models.ClaseAdmin import Admin
 
 class Empleado(Admin):
     def __init__(self, IdEmpleado, Cedula, NombreEmpleado, Apellido, Telefono, Email, Contra ):

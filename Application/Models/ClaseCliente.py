@@ -1,4 +1,4 @@
-from Controllers.ClaseEmpleado import Empleado
+from Models.ClaseEmpleado import Empleado
 class Cliente(Empleado):
     def __init__(self, IdCliente, Cedula, NombreCliente, ApellidoCliente, Telefono, Email, LicenciaDeConducir):
         self.__IdCliente = IdCliente

@@ -1,6 +1,6 @@
-from Controllers.ClaseEmpleado import Empleado
-from Controllers.ClaseCliente import  Cliente
-from Controllers.ClaseVehiculo import Vehiculo
+from Models.ClaseEmpleado import Empleado
+from Models.ClaseCliente import  Cliente
+from Models.ClaseVehiculo import Vehiculo
 class Factura(Empleado,Cliente,Vehiculo):
     def __init__(self,NombreEmpleado,NombreCliente,NombreVehiculo,TipoVehiculo,ModeloVehiculo,AñoVehiculo):
         self.__NombreEmpleado = NombreEmpleado
