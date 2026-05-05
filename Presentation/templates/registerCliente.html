@@ -19,10 +19,11 @@
         }
 
         .container {
-            background-color: #3a3a3c;
-            padding: 20px;
+            background-color: #2c2c2c;
+            padding: 1rem;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow:  inset 2px 2px 10px rgba(0, 0, 0, 1),
+            inset -1px -1px 5px rgba(255, 255, 255, 0.6);
             width: 400px;
         }
 
@@ -48,17 +49,25 @@
         }
 
         button {
-            padding: 10px;
-            background-color: #848489;
-            color: white;
-            border: none;
-            border-radius: 4px;
+            padding: 10px 35px;
             cursor: pointer;
-            margin-bottom: 10px;
+            background-color: #212121;
+            border-radius: 6px;
+            border: 2px solid #212121;
+            box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+                1px 1px 10px rgba(255, 255, 255, 0.6);
+            color: #fff;
+            font-size: 15px;
+            font-weight: bold;
+            transition: 0.35s;
         }
 
         button:hover {
-            background-color: #6a6a6d;
+            transform: scale(1.05);
+        box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+            1px 1px 10px rgba(255, 255, 255, 0.6),
+            inset 2px 2px 10px rgba(0, 0, 0, 1),
+            inset -1px -1px 5px rgba(255, 255, 255, 0.6);
         }
 
         .back-link {

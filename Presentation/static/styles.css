@@ -4,14 +4,17 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #212121;
+    color: #ffffff;
 }
 
 header {
-    background-color: #262627;
-    color: white;
+    background-color: #2c2c2c;
     padding: 1rem;
+    border-radius: 8px;
+    box-shadow:  inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+    flex: 1 1 300px;
 }
 
 nav {
@@ -61,10 +64,11 @@ main {
 }
 
 .vehiculo {
-    background-color: white;
+    background-color: #2c2c2c;
     padding: 1rem;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow:  inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
     flex: 1 1 300px;
 }
 
@@ -79,58 +83,27 @@ main {
     margin-top: 2rem;
 }
 
-.login {
-    max-width: 400px;
-    margin: 0 auto;
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-label {
-    margin-bottom: 0.5rem;
-}
-
-input {
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-button {
-    padding: 0.75rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
 .flash-messages {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 1rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    background-color: rgba(239, 66, 84, 0.2);
+    color: #ff6b7a;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    border: 1px solid rgba(239, 66, 84, 0.5);
+    width: 245px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.flash-messages p {
+    margin: 0;
 }
 
 .panel {
-    background-color: white;
+    background-color: #212121;
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
 .acciones {
@@ -139,6 +112,7 @@ button:hover {
     margin-top: 1rem;
     flex-wrap: wrap;
 }
+
 .btn-crearEmpleado,
 .btn-consultarEmpleado,
 .btn-CrearVehiculo,
@@ -153,8 +127,9 @@ button:hover {
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
-    text-decoration:none;
+    text-decoration: none;
 }
+
 .btn-Cerrar,
 .btn-volver,
 .btn-volver-rol {
@@ -163,5 +138,166 @@ button:hover {
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
-    text-decoration:none;
+    text-decoration: none;
+}
+
+
+/* =============================================
+    NUEVO LOGIN ANIMADO (reemplaza .login anterior)
+   ============================================= */
+
+/* Wrapper que centra el formulario en la página */
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh; /* ocupa la mayor parte de la pantalla */
+}
+
+/* Contenedor del flip card */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* El formulario con efecto 3D */
+.form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+    transition: all 1s ease;
+    width: 380px;
+    height: 380px;
+    position: relative;
+}
+
+/* Cara delantera del formulario */
+.form .form_front {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    position: absolute;
+    backface-visibility: hidden;
+    padding: 40px 45px;
+    width: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+    border-radius: 15px;
+    box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+    background-color: #2c2c2c; /* fondo oscuro para que se vea bien */
+}
+
+/* Cara trasera del formulario (registro, si la usas) */
+.form .form_back {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    position: absolute;
+    backface-visibility: hidden;
+    transform: rotateY(-180deg);
+    padding: 65px 45px;
+    border-radius: 15px;
+    box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+    background-color: #2c2c2c;
+}
+
+/* Título del formulario */
+.form_details {
+    font-size: 25px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    color: white;
+}
+
+/* Campos de texto del nuevo login */
+.input {
+    width: 245px;
+    min-height: 45px;
+    color: #fff;
+    outline: none;
+    transition: 0.35s;
+    padding: 0px 7px;
+    background-color: #212121;
+    border-radius: 6px;
+    border: 2px solid #212121;
+    box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+        1px 1px 10px rgba(255, 255, 255, 0.6);
+}
+
+.input::placeholder {
+    color: #999;
+}
+
+.input:focus.input::placeholder {
+    transition: 0.3s;
+    opacity: 0;
+}
+
+.input:focus {
+    transform: scale(1.05);
+    box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+        1px 1px 10px rgba(255, 255, 255, 0.6),
+        inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+}
+
+/* Botón del nuevo login */
+.btn {
+    padding: 10px 35px;
+    cursor: pointer;
+    background-color: #212121;
+    border-radius: 6px;
+    border: 2px solid #212121;
+    box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+        1px 1px 10px rgba(255, 255, 255, 0.6);
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    transition: 0.35s;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+        1px 1px 10px rgba(255, 255, 255, 0.6),
+        inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+}
+
+.btn:focus {
+    transform: scale(1.05);
+    box-shadow: 6px 6px 10px rgba(0, 0, 0, 1),
+        1px 1px 10px rgba(255, 255, 255, 0.6),
+        inset 2px 2px 10px rgba(0, 0, 0, 1),
+        inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+}
+
+/* Texto de cambio entre login y registro */
+.form .switch {
+    font-size: 13px;
+    color: white;
+}
+
+.form .switch .signup_tog {
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Checkbox oculto que activa el giro */
+.container #signup_toggle {
+    display: none;
+}
+
+/* Cuando el checkbox está marcado, el formulario gira */
+.container #signup_toggle:checked + .form {
+    transform: rotateY(-180deg);
 }

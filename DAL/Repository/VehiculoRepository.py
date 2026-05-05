@@ -20,3 +20,19 @@ class VehiculoRepository():
             return True, "Vehiculo registrado"
         except Exception as e:
             return False, f"Error al registrar el Vehiculo {e}"
+
+    def eliminarVehiculo(self, idVehiculo):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            sql = "DELETE FROM VEHICULOS WHERE ID_VEHICULOS = %s"
+            datos = (idVehiculo)
+            cursor.execute(sql, datos)
+            db.commit()
+            cursor.close()
+            conexion.CerrarConnection()
+            return True, "Vehiculo eliminado"
+        except Exception as e:
+            return False, f"Error al eliminar el vehiculo: {e}"

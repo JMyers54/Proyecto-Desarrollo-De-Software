@@ -117,7 +117,30 @@ def registrar_clien():
     else: 
         return redirect(url_for("registrar_cliente"))
     
+@app.route("/registrar_vehiculo")
+def registrar_vehiculo():
+    if "admin" not in session:
+        return redirect(url_for("login"))
+    return render_template("registerVehiculo.html")
 
+@app.route("/registro_vehiculo", methods=["POST"])
+def registrar_vehiculo_post():
+    if "admin" not in session:
+        return redirect(url_for("login"))
+    IdVehiculo = request.form['IdVehiculo']
+    Marca = request.form['Marca']
+    Modelo = request.form['Modelo']
+    Año = request.form['Año']
+    Tipo = request.form['Tipo']
+    Precio_diario = request.form['Precio_diario']
+    Estado = request.form['Estado']
+    success, message = vehiculo_repo.RegistrarVehiculos(IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado)
+    flash(message)
+    if success:
+        return redirect(url_for("admin"))
+    else: 
+        return redirect(url_for("registrar_vehiculo"))
+    
 @app.route('/logout')
 def logout():
     session.pop('admin', None)

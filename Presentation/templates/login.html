@@ -12,28 +12,34 @@
     <header>
         <nav>
             <h1>Alquiler de Vehículos</h1>
-            <a href="{{ url_for('login') }}"class="btn-volver-rol">Seleccionar Rol</a>
+            <a href="{{ url_for('login') }}" class="btn-volver-rol">Seleccionar Rol</a>
         </nav>
     </header>
+
     <main>
         <section class="login">
-            <h2>Iniciar Sesión como {{ rol.capitalize() }}</h2>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div class="flash-messages">
-                {% for message in messages %}
-                <p>{{ message }}</p>
-                {% endfor %}
+            <div class="container">
+                <input id="signup_toggle" type="checkbox">
+                <form class="form" method="POST">
+                    <div class="form_front">
+                        <div class="form_details">{{ rol.capitalize() }}</div>
+
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div class="flash-messages">
+                            {% for message in messages %}
+                            <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
+                        <input type="text" class="input" id="id" name="id" placeholder="ID" required>
+                        <input type="password" class="input" id="contra" name="contra" placeholder="Contraseña" required>
+                        <button class="btn" type="submit">Iniciar Sesión</button>
+                    </div>
+                </form>
             </div>
-            {% endif %}
-            {% endwith %}
-            <form method="POST">
-                <label for="id">ID:</label>
-                <input type="text" id="id" name="id" required>
-                <label for="contra">Contraseña:</label>
-                <input type="password" id="contra" name="contra" required>
-                <button type="submit">Iniciar Sesión</button>
-            </form>
         </section>
     </main>
 </body>
