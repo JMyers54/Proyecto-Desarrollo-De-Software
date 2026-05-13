@@ -11,7 +11,7 @@ class VehiculoRepository():
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
-            sql = "INSERT INTO VEHICULOS (ID_VEHICULOS,MARCA,MODELO,AÑO,TIPO,PRECIO_POR_DIA,ESTADO) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+            sql = "INSERT INTO VEHICULOS (ID_VEHICULO,MARCA,MODELO,AÑO,TIPO,PRECIO_POR_DIA,ESTADO) VALUES (%s,%s,%s,%s,%s,%s,%s)"
             datos =(IdVehiculo,Marca,Modelo,Año,Tipo,Precio_diario,Estado)
             cursor.execute(sql, datos)
             db.commit()
@@ -21,18 +21,16 @@ class VehiculoRepository():
         except Exception as e:
             return False, f"Error al registrar el Vehiculo {e}"
 
-    def eliminarVehiculo(self, idVehiculo):
-        try:
-            conexion = ConexionDB()
-            conexion.CrearConnection()
-            db = conexion.getConnection()
-            cursor = db.cursor()
-            sql = "DELETE FROM VEHICULOS WHERE ID_VEHICULOS = %s"
-            datos = (idVehiculo)
-            cursor.execute(sql, datos)
-            db.commit()
-            cursor.close()
-            conexion.CerrarConnection()
-            return True, "Vehiculo eliminado"
-        except Exception as e:
-            return False, f"Error al eliminar el vehiculo: {e}"
+def eliminar_vehiculo(conn, idVehiculo):
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM VEHICULOS WHERE ID_VEHICULOS = %s", (idVehiculo,))
+    conn.commit()
+    cursor.close()
+
+def obtener_vehiculos(conn):
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado 
+        FROM Vehiculos
+    """)
+    return cursor.fetchall()

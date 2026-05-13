@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
 from DAL.Repository.AdminRepository import AdminRepository
 from DAL.Repository.EmpleadoRepository import EmpleadoRepository
 from DAL.Repository.ClienteRepository import ClienteRepository
 from DAL.Repository.VehiculoRepository import VehiculoRepository
 from DAL.Infrastructure.ConexionDB import ConexionDB
-
+from Application.Services.ServicesVehiculos import ServicesVehiculos
 app = Flask(__name__, template_folder='Presentation/templates', static_folder='Presentation/static')   
 app.secret_key = 'your_secret_key_here'  # Cambia esto por una clave secreta segura
 
@@ -13,6 +13,7 @@ admin_repo = AdminRepository(None, modelo)
 empleado_repo = EmpleadoRepository(None, modelo)
 cliente_repo = ClienteRepository(None, modelo)
 vehiculo_repo = VehiculoRepository(None, modelo)
+vehiculo_service = ServicesVehiculos(modelo)
 
 @app.route('/')
 def index():
@@ -117,8 +118,8 @@ def registrar_clien():
     else: 
         return redirect(url_for("registrar_cliente"))
     
-@app.route("/registrar_vehiculo")
-def registrar_vehiculo():
+@app.route("/registro_vehiculo")
+def registro_vehiculo():
     if "admin" not in session:
         return redirect(url_for("login"))
     return render_template("registerVehiculo.html")
@@ -134,12 +135,12 @@ def registrar_vehiculo_post():
     Tipo = request.form['Tipo']
     Precio_diario = request.form['Precio_diario']
     Estado = request.form['Estado']
-    success, message = vehiculo_repo.RegistrarVehiculos(IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado)
+    success, message = vehiculo_repo.RegistroVehiculos(IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado)
     flash(message)
     if success:
         return redirect(url_for("admin"))
     else: 
-        return redirect(url_for("registrar_vehiculo"))
+        return redirect(url_for("registro_vehiculo"))
     
 @app.route('/logout')
 def logout():
@@ -148,5 +149,15 @@ def logout():
     session.pop('cliente', None)
     return redirect(url_for('index'))
 
+@app.route('/inventario')
+def vista_inventario():
+    return render_template('Inventario.html')
+
+@app.route('/api/vehiculos')
+def api_vehiculos():
+    try:
+        return jsonify(vehiculo_service.listar_vehiculos())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 if __name__ == '__main__':
     app.run(debug=True)

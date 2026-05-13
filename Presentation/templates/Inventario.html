@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Inventario de Vehículos</h1>
+            <a href="{{ url_for('logout') }}" class="btn-Cerrar">Cerrar Sesión</a>
+        </nav>
+    </header>
+<div class="inv-page">
+
+
+    <!-- STATS -->
+    <div class="stats">
+    <div class="stat">
+        <div class="stat-label">Total</div>
+        <div class="stat-val" id="s-total">—</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Disponibles</div>
+        <div class="stat-val" id="s-disp">—</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Ocupados</div>
+        <div class="stat-val" id="s-vend">—</div>
+    </div>
+    <div class="stat">
+        <div class="stat-label">Mantenimiento</div>
+        <div class="stat-val" id="s-mant">—</div>
+    </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+    <input type="text" id="search" placeholder="Buscar por placa, marca, modelo…" oninput="renderTable()">
+    <select id="f-estado" onchange="renderTable()">
+        <option value="">Todos los estados</option>
+        <option>Disponible</option>
+        <option>Ocupado</option>
+        <option>Mantenimiento</option>
+
+    </select>
+    <select id="f-tipo" onchange="renderTable()">
+        <option value="">Todos los tipos</option>
+        <option>Sedan</option>
+        <option option>SUV</option>
+        <option>Camioneta</option>
+        <option>Moto</option>
+        <option>Furgón</option>
+    </select>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+    <table>
+        <thead>
+        <tr>
+            <th class="col-placa">Placa</th>
+            <th class="col-marca">Marca</th>
+            <th class="col-modelo">Modelo</th>
+            <th class="col-anio">Año</th>
+            <th class="col-color">Color</th>
+            <th class="col-tipo">Tipo</th>
+            <th class="col-precio">Precio</th>
+            <th class="col-estado">Estado</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        <tr class="empty-row"><td colspan="8">Cargando…</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <!-- PANEL DE DETALLE -->
+    <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+        <h3 id="detail-title">Detalle</h3>
+        <button class="btn-icon" onclick="closeDetail()" title="Cerrar">
+        <i class="ti ti-x"></i>
+        </button>
+    </div>
+    <div class="detail-grid" id="detail-grid"></div>
+    </div>
+
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+    let vehicles   = [];
+    let selectedId = null;
+
+    document.addEventListener("DOMContentLoaded", loadVehicles);
+
+  /* ── API ── */
+    async function loadVehicles() {
+    try {
+        const res = await fetch("/api/vehiculos");
+        if (!res.ok) throw new Error("Error al cargar");
+        vehicles = await res.json();
+        renderTable();
+    } catch (e) {
+        toast("Error cargando datos: " + e.message, true);
+    }
+    }
+
+  /* ── FILTROS ── */
+    function getFiltered() {
+    const q    = document.getElementById("search").value.toLowerCase();
+    const est  = document.getElementById("f-estado").value;
+    const tipo = document.getElementById("f-tipo").value;
+    return vehicles.filter(v => {
+        const mQ = !q    || v.placa?.toLowerCase().includes(q) || v.marca?.toLowerCase().includes(q) || v.modelo?.toLowerCase().includes(q);
+        const mE = !est  || v.estado === est;
+        const mT = !tipo || v.tipo   === tipo;
+        return mQ && mE && mT;
+    });
+    }
+
+  /* ── STATS ── */
+    function updateStats() {
+    document.getElementById("s-total").textContent = vehicles.length;
+    document.getElementById("s-disp").textContent  = vehicles.filter(v => v.estado === "Disponible").length;
+    document.getElementById("s-vend").textContent  = vehicles.filter(v => v.estado === "Ocupado").length;
+    document.getElementById("s-mant").textContent  = vehicles.filter(v => v.estado === "Mantenimiento").length;
+    }
+
+  /* ── TABLA ── */
+    function renderTable() {
+    updateStats();
+    const list  = getFiltered();
+    const tbody = document.getElementById("tbody");
+    if (!list.length) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Sin resultados</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map(v => `
+        <tr data-id="${v.id}" class="${selectedId === v.id ? 'selected' : ''}" onclick="showDetail(${v.id})">
+        <td class="placa">${v.placa  || "—"}</td>
+        <td>${v.marca  || "—"}</td>
+        <td>${v.modelo || "—"}</td>
+        <td>${v.año   || "—"}</td>
+        <td>${v.color  || "—"}</td>
+        <td>${v.tipo   || "—"}</td>
+        <td>$${Number(v.precio || 0).toLocaleString()}</td>
+        <td><span class="badge b-${v.estado}">${v.estado}</span></td>
+        </tr>`).join("");
+    }
+
+  /* ── DETALLE ── */
+    function showDetail(id) {
+    const v = vehicles.find(x => x.id === id);
+    if (!v) return;
+    selectedId = id;
+    renderTable();
+    document.getElementById("detail-title").textContent = `${v.marca} ${v.modelo} — ${v.placa}`;
+    document.getElementById("detail-grid").innerHTML = `
+        <div class="detail-item"><label>Año</label><span>${v.año || "—"}</span></div>
+        <div class="detail-item"><label>Color</label><span>${v.color || "—"}</span></div>
+        <div class="detail-item"><label>Tipo</label><span>${v.tipo || "—"}</span></div>
+        <div class="detail-item"><label>Estado</label><span>${v.estado || "—"}</span></div>
+        <div class="detail-item"><label>Precio</label><span>$${Number(v.precio||0).toLocaleString()}</span></div>
+        <div class="detail-item"><label>Kilometraje</label><span>${Number(v.km||0).toLocaleString()} km</span></div>
+        <div class="detail-item"><label>Combustible</label><span>${v.combustible || "—"}</span></div>
+        <div class="detail-item"><label>Transmisión</label><span>${v.transmision || "—"}</span></div>
+        <div class="detail-item"><label>Motor</label><span>${v.motor ? v.motor + " cc" : "—"}</span></div>
+        <div class="detail-item wide"><label>Observaciones</label><span>${v.obs || "Sin observaciones"}</span></div>`;
+    document.getElementById("detail-panel").classList.add("open");
+    }
+
+    function closeDetail() {
+    selectedId = null;
+    document.getElementById("detail-panel").classList.remove("open");
+    renderTable();
+    }
+
+  /* ── TOAST ── */
+    let toastTimer;
+    function toast(msg, isError = false) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.style.background = isError ? "#a32d2d" : "#1a1a18";
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+    }
+</script>
+
+</body>
+</html>
