@@ -21,7 +21,7 @@
             <p>Desde aquí puedes gestionar alquileres y clientes.</p>
             <div class="acciones">
                 <a href="#" class="btn-accion">Gestionar Alquileres</a>
-                <a href="#" class="btn-accion">Ver Clientes</a>
+                <a href="{{ url_for('vista_clientes') }}" class="btn-accion">Ver Clientes</a>
                 <a href="{{ url_for('registrar_cliente')}}" class="btn-accion">Registrar Cliente</a>
                 <!-- Agregar más acciones aquí -->
             </div>

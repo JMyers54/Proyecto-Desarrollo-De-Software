@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestión de Empleados</h1>
+            <a href="{{ url_for('logout') }}" class="btn-Cerrar">Cerrar Sesión</a>
+        </nav>
+    </header>
+<div class="inv-page">
+
+
+    <!-- STATS -->
+    <div class="stats">
+    <div class="stat">
+        <div class="stat-label">Total Empleados</div>
+        <div class="stat-val" id="s-total">—</div>
+    </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+    <input type="text" id="search" placeholder="Buscar por cédula, nombre, apellido…" oninput="renderTable()">
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+    <table>
+        <thead>
+        <tr>
+            <th class="col-cedula">Cédula</th>
+            <th class="col-nombre">Nombre</th>
+            <th class="col-apellido">Apellido</th>
+            <th class="col-region">Region</th>
+            <th class="col-telefono">Teléfono</th>
+            <th class="col-email">Email</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <!-- PANEL DE DETALLE -->
+    <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+        <h3 id="detail-title">Detalle</h3>
+        <button class="btn-icon" onclick="closeDetail()" title="Cerrar">
+        <i class="ti ti-x"></i>
+        </button>
+    </div>
+    <div class="detail-grid" id="detail-grid"></div>
+    </div>
+
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+    let empleados  = [];
+    let selectedId = null;
+
+    document.addEventListener("DOMContentLoaded", loadEmpleados);
+
+  /* ── API ── */
+    async function loadEmpleados() {
+    try {
+        const res = await fetch("/api/empleados");
+        if (!res.ok) throw new Error("Error al cargar");
+        empleados = await res.json();
+        renderTable();
+    } catch (e) {
+        toast("Error cargando datos: " + e.message, true);
+    }
+    }
+
+  /* ── FILTROS ── */
+    function getFiltered() {
+    const q = document.getElementById("search").value.toLowerCase();
+    return empleados.filter(e => {
+        const mQ = !q || e.cedula?.toLowerCase().includes(q) || e.nombre?.toLowerCase().includes(q) || e.apellido?.toLowerCase().includes(q) || e.email?.toLowerCase().includes(q);
+        return mQ;
+    });
+    }
+
+  /* ── STATS ── */
+    function updateStats() {
+    document.getElementById("s-total").textContent = empleados.length;
+    }
+
+  /* ── TABLA ── */
+    function renderTable() {
+    updateStats();
+    const list  = getFiltered();
+    const tbody = document.getElementById("tbody");
+    if (!list.length) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Sin resultados</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map(e => `
+        <tr data-id="${e.id}" class="${selectedId === e.id ? 'selected' : ''}" onclick="showDetail(${e.id})">
+        <td>${e.cedula  || "—"}</td>
+        <td>${e.nombre  || "—"}</td>
+        <td>${e.apellido || "—"}</td>
+        <td>${e.region   || "—"}</td>
+        <td>${e.telefono || "—"}</td>
+        <td>${e.email || "—"}</td>
+        </tr>`).join("");
+    }
+
+  /* ── DETALLE ── */
+    function showDetail(id) {
+    const e = empleados.find(x => x.id === id);
+    if (!e) return;
+    selectedId = id;
+    renderTable();
+    document.getElementById("detail-title").textContent = `${e.nombre} ${e.apellido}`;
+    document.getElementById("detail-grid").innerHTML = `
+        <div class="detail-item"><label>Cédula</label><span>${e.cedula || "—"}</span></div>
+        <div class="detail-item"><label>Nombre</label><span>${e.nombre || "—"}</span></div>
+        <div class="detail-item"><label>Apellido</label><span>${e.apellido || "—"}</span></div>
+        <div class="detail-item"><label>Region</label><span>${e.region || "—"}</span></div>
+        <div class="detail-item"><label>Teléfono</label><span>${e.telefono || "—"}</span></div>
+        <div class="detail-item"><label>Email</label><span>${e.email || "—"}</span></div>`;
+    document.getElementById("detail-panel").classList.add("open");
+    }
+
+    function closeDetail() {
+    selectedId = null;
+    document.getElementById("detail-panel").classList.remove("open");
+    renderTable();
+    }
+
+  /* ── TOAST ── */
+    let toastTimer;
+    function toast(msg, isError = false) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.style.background = isError ? "#a32d2d" : "#1a1a18";
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+    }
+</script>
+
+</body>
+</html>

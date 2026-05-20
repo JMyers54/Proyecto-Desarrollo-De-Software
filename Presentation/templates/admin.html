@@ -21,13 +21,13 @@
             <p>Desde aquí puedes gestionar empleados, vehículos y más.</p>
             <div class="acciones">
                 <a href="{{ url_for('registrar_form') }}" class="btn-crearEmpleado">Registrar Empleado</a>
-                <a href="#" class="btn-consultarEmpleado">Consultar Empleado</a>
+                <a href="{{ url_for('vista_empleados') }}" class="btn-consultarEmpleado">Consultar Empleado</a>
                 <a href="{{ url_for('registro_vehiculo') }}" class="btn-CrearVehiculo">Crear Vehículos</a>
                 <a href="#" class="btn-ActualizarVehiculo">Actualizar Vehículos</a>
                 <a href="#" class="btn-EliminarVehiculo">Eliminar Vehículos</a>
                 <a href="{{ url_for('vista_inventario') }}" class="btn-ConsultarVehiculo">Consultar Vehículos</a>
-                <a href="#" class="btn-consultarCliente">Consultar Cliente</a>
-                <a href="#" class="btn-dashboard">Consultar Empleado</a>
+                <a href="{{ url_for('vista_clientes') }}" class="btn-consultarCliente">Consultar Cliente</a>
+                <a href="#" class="btn-dashboard">Consultar dashboard</a>
                 <!-- Agregar más acciones aquí -->
             </div>
         </section>

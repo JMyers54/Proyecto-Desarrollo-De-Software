@@ -40,3 +40,10 @@ class EmpleadoRepository():
                 return False, "Contraseña Incorrecta."
         except Exception as e:
             return False, f"Error al iniciar sesión: {e}"
+
+    def obtener_empleado(conn):
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT IdEmpleado, Cedula, Nombre, Apellido, Region, Telefono, Email FROM empleado
+        """)
+        return cursor.fetchall()

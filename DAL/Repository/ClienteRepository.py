@@ -40,3 +40,10 @@ class ClienteRepository():
         except Exception as e:
             return False, f"Error al iniciar sesión: {e}"
         
+
+    def obtener_clientes(conn):
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT Id_Cliente, Cedula, Nombre, Apellido, Region, Telefono, Email FROM clientes
+        """)
+        return cursor.fetchall()

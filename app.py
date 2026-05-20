@@ -5,6 +5,8 @@ from DAL.Repository.ClienteRepository import ClienteRepository
 from DAL.Repository.VehiculoRepository import VehiculoRepository
 from DAL.Infrastructure.ConexionDB import ConexionDB
 from Application.Services.ServicesVehiculos import ServicesVehiculos
+from Application.Services.ServicesCliente import ServicesCliente
+from Application.Services.ServicesEmpleado import ServicesEmpleado
 app = Flask(__name__, template_folder='Presentation/templates', static_folder='Presentation/static')   
 app.secret_key = 'your_secret_key_here'  # Cambia esto por una clave secreta segura
 
@@ -14,6 +16,8 @@ empleado_repo = EmpleadoRepository(None, modelo)
 cliente_repo = ClienteRepository(None, modelo)
 vehiculo_repo = VehiculoRepository(None, modelo)
 vehiculo_service = ServicesVehiculos(modelo)
+empleado_service = ServicesEmpleado(modelo)
+cliente_service = ServicesCliente(modelo)
 
 @app.route('/')
 def index():
@@ -157,6 +161,27 @@ def vista_inventario():
 def api_vehiculos():
     try:
         return jsonify(vehiculo_service.listar_vehiculos())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/clientes')
+def vista_clientes():
+    return render_template('clientes.html')
+@app.route('/api/clientes')
+def api_clientes():
+    try:
+        return jsonify(cliente_service.listar_clientes())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/empleados')
+def vista_empleados():
+    return render_template('empleados.html')
+
+@app.route('/api/empleados')
+def api_empleados():
+    try:
+        return jsonify(empleado_service.listar_empleados())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 if __name__ == '__main__':
