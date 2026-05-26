@@ -47,3 +47,36 @@ class ClienteRepository():
             SELECT Id_Cliente, Cedula, Nombre, Apellido, Region, Telefono, Email FROM clientes
         """)
         return cursor.fetchall()
+    
+    def alquilar_vehiculo(conn, id_cliente, id_vehiculo, fecha_inicio, fecha_fin):
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO alquileres (Id_Cliente, Id_Vehiculo, Fecha_Inicio, Fecha_Fin)
+            VALUES (%s, %s, %s, %s)
+        """, (id_cliente, id_vehiculo, fecha_inicio, fecha_fin))
+        conn.commit()
+
+    def mostrar_clientes(self):
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                conn = conexion.getConnection()
+                cursor = conn.cursor()
+                cursor.execute("SELECT Id_Cliente, Cedula, Nombre, Apellido, Region, Telefono, Email FROM clientes")
+                filas = cursor.fetchall()
+                return [
+                    {
+                        "id":     f[0],
+                        "cedula": str(f[1]),
+                        "nombre": f[2],
+                        "apellido": f[3],
+                        "region": f[4],
+                        "telefono": f[5],
+                        "email": f[6]
+                    }
+                    for f in filas
+                ]
+            except Exception as e:
+                raise e
+            finally:
+                self.modelo.CerrarConnection()

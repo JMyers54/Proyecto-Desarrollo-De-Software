@@ -10,7 +10,7 @@
     <header>
         <nav>
             <h1>Gestión de Clientes</h1>
-            <a href="{{ url_for('logout') }}" class="btn-Cerrar">Cerrar Sesión</a>
+            <a href="/admin" class="btn-volver">Volver al panel</s></a>
         </nav>
     </header>
 <div class="inv-page">
@@ -35,12 +35,13 @@
             <th class="col-cedula">Cédula</th>
             <th class="col-nombre">Nombre</th>
             <th class="col-apellido">Apellido</th>
+            <th class="col-region">Región</th>
             <th class="col-telefono">Teléfono</th>
             <th class="col-email">Email</th>
         </tr>
         </thead>
         <tbody id="tbody">
-        <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
+        <tr class="empty-row"><td colspan="6">Cargando…</td></tr>
         </tbody>
     </table>
     </div>
@@ -124,6 +125,7 @@
         <div class="detail-item"><label>Cédula</label><span>${c.cedula || "—"}</span></div>
         <div class="detail-item"><label>Nombre</label><span>${c.nombre || "—"}</span></div>
         <div class="detail-item"><label>Apellido</label><span>${c.apellido || "—"}</span></div>
+        <div class="detail-item"><label>Región</label><span>${c.region || "—"}</span></div>
         <div class="detail-item"><label>Teléfono</label><span>${c.telefono || "—"}</span></div>
         <div class="detail-item"><label>Email</label><span>${c.email || "—"}</span></div>`;
     document.getElementById("detail-panel").classList.add("open");

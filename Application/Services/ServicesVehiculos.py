@@ -1,49 +1,39 @@
 from DAL.Infrastructure.ConexionDB import ConexionDB
 from DAL.Repository.VehiculoRepository import VehiculoRepository
 
+ESTADOS_VALIDOS = ["Disponible", "Alquilado", "Mantenimiento"]
 class ServicesVehiculos():
     def __init__(self, modelo):
         self.modelo = modelo
-
-    def eliminarVehiculo(idVehiculo):
+        self.vehiculo_repo = VehiculoRepository(None, modelo)
+    
+    def alquilar_vehiculo(self, id_vehiculo):
         try:
-            conexion = ConexionDB()
-            conexion.CrearConnection()
-            conn = conexion.getConnection()
-            vehiculo = VehiculoRepository()
-
-            vehiculo.eliminar_vehiculo(conn, idVehiculo)
-
-            return True, "Vehiculo eliminado"
-
+            exito = self.vehiculo_repo.alquilar(id_vehiculo)
+            if exito:
+                return True, "Vehículo alquilado correctamente"
+            else:
+                return False, "No se pudo actualizar el estado"
         except Exception as e:
-            return False, str(e)
+            return False, f"Error en el servicio: {str(e)}"
 
-        finally:
-            conexion.CerrarConnection()
-
+    def eliminarVehiculo(self, idVehiculo):
+        try:
+            exito = self.vehiculo_repo.EliminarVehiculo(idVehiculo)
+            if exito:
+                return True, "Vehículo eliminado correctamente"
+            else:
+                return False, "No se pudo eliminar el vehículo"
+        except Exception as e:
+            return False, f"Error en el servicio: {str(e)}"
 
     def listar_vehiculos(self):
         try:
-            self.modelo.CrearConnection()
-            conn = self.modelo.getConnection()
-            cursor = conn.cursor()
-            cursor.execute("SELECT Id_Vehiculo, Marca, Modelo, Año, Tipo, Precio_Por_Dia, Estado FROM Vehiculos")
-            filas = cursor.fetchall()
-            return [
-                {
-                    "id":     f[0],
-                    "placa": str(f[0]),
-                    "marca":  f[1],
-                    "modelo": f[2],
-                    "año":   f[3],
-                    "tipo":   f[4],
-                    "precio": float(f[5]),
-                    "estado": f[6]
-                }
-                for f in filas
-            ]
+            exito = self.vehiculo_repo.mostrar_vehiculos()
+            if exito:
+                return exito
+            else:
+                return False, "No se pudo listar los vehículos"
         except Exception as e:
-            raise e
-        finally:
-            self.modelo.CerrarConnection()
+            return False, f"Error en el servicio: {str(e)}"
+

@@ -23,6 +23,7 @@ cliente_service = ServicesCliente(modelo)
 def index():
     return render_template('index.html')
 
+# selección de rol para inicio de sesión
 @app.route('/login')
 def login():
     return render_template('seleccionar_rol.html')
@@ -56,24 +57,28 @@ def login_rol(rol):
     
     return render_template('login.html', rol=rol)
 
+#incio de sesión para admin
 @app.route('/admin')
 def admin():
     if 'admin' not in session:
         return redirect(url_for('login'))
     return render_template('admin.html')
 
+#Inicio de sesión para empleados
 @app.route('/empleado')
 def empleado():
     if 'empleado' not in session:
         return redirect(url_for('login'))
     return render_template('empleado.html')
 
+#Inicio de sesión para clientes
 @app.route('/cliente')
 def cliente():
     if 'cliente' not in session:
         return redirect(url_for('login'))
     return render_template('cliente.html')
 
+#Registro de empleado solo para admin
 @app.route('/registrar_empleado')
 def registrar_form():
     if 'admin' not in session:
@@ -98,6 +103,7 @@ def registrar():
     else:
         return redirect(url_for('registrar_form'))
 
+#Registro de cliente solo para empleados
 @app.route("/registrar_cliente")
 def registrar_cliente():
     if "empleado" not in session:
@@ -122,6 +128,8 @@ def registrar_clien():
     else: 
         return redirect(url_for("registrar_cliente"))
     
+
+#Registro de vehiculo solo para admin
 @app.route("/registro_vehiculo")
 def registro_vehiculo():
     if "admin" not in session:
@@ -153,6 +161,7 @@ def logout():
     session.pop('cliente', None)
     return redirect(url_for('index'))
 
+# Vista de inventario para empleados y clientes
 @app.route('/inventario')
 def vista_inventario():
     return render_template('Inventario.html')
@@ -184,5 +193,34 @@ def api_empleados():
         return jsonify(empleado_service.listar_empleados())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+#Alquiler de vehículos para clientes
+@app.route('/alquilar')
+def vista_alquilar():
+    return render_template('AlquilarVehiculo.html')
+
+@app.route('/api/vehiculos/actualizar', methods=['POST'])
+def actualizar_vehiculo():
+    if 'admin' not in session:
+        return jsonify({"error": "No autorizado"}), 401
+    data = request.get_json(force=True)
+    ok, message = vehiculo_repo.ActualizarVehiculo(
+        data['idVehiculo'], data['marca'], data['modelo'], 
+        data['año'], data['tipo'], data['precio_diario'], data['estado']
+    )
+    if ok:
+        return jsonify({"message": message})
+    return jsonify({"error": message}), 500
+
+@app.route('/api/vehiculos/eliminar', methods=['POST'])
+def eliminar_vehiculo():
+    if 'admin' not in session:
+        return jsonify({"error": "No autorizado"}), 401
+    data = request.get_json(force=True)
+    ok, message = vehiculo_repo.EliminarVehiculo(
+        data['idVehiculo']
+    )
+    if ok:
+        return jsonify({"message": message})
+    return jsonify({"error": message}), 500
 if __name__ == '__main__':
     app.run(debug=True)
