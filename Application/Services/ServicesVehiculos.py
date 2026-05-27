@@ -17,7 +17,7 @@ class ServicesVehiculos():
         except Exception as e:
             return False, f"Error en el servicio: {str(e)}"
 
-    def eliminarVehiculo(self, idVehiculo):
+    def eliminaVehiculo(self, idVehiculo):
         try:
             exito = self.vehiculo_repo.EliminarVehiculo(idVehiculo)
             if exito:
@@ -36,4 +36,15 @@ class ServicesVehiculos():
                 return False, "No se pudo listar los vehículos"
         except Exception as e:
             return False, f"Error en el servicio: {str(e)}"
-
+    
+    def ActualizarVehiculo(self, idVehiculo, marca, modelo, año, tipo, PrecioDiario, estado):
+        if estado not in ESTADOS_VALIDOS:
+            return False, f"Estado inválido. Los estados válidos son: {', '.join(ESTADOS_VALIDOS)}"
+        try:
+            exito = self.vehiculo_repo.ActualizarVehiculo(idVehiculo, marca, modelo, año, tipo, PrecioDiario, estado)
+            if exito:
+                return True, "Vehículo actualizado correctamente"
+            else:
+                return False, "No se pudo actualizar el vehículo"
+        except Exception as e:
+            return False, f"Error en el servicio: {str(e)}"

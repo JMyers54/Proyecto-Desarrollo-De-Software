@@ -11,27 +11,31 @@ class VehiculoRepository():
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
-            sql = "INSERT INTO VEHICULOS (ID_VEHICULO,MARCA,MODELO,AÑO,TIPO,PRECIO_POR_DIA,ESTADO) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-            datos =(IdVehiculo,Marca,Modelo,Año,Tipo,Precio_diario,Estado)
+            
+            # CORRECCIÓN: Quitamos ID_VEHICULO de los campos y del VALUES (%s)
+            sql = "INSERT INTO VEHICULOS (ID_VEHICULO,MARCA, MODELO, AÑO, TIPO, PRECIO_POR_DIA, ESTADO) VALUES (%s,%s, %s, %s, %s, %s, %s)"
+            datos = (IdVehiculo,Marca, Modelo, Año, Tipo, Precio_diario, Estado)
+            
             cursor.execute(sql, datos)
             db.commit()
             cursor.close()
             conexion.CerrarConnection()
-            return True, "Vehiculo registrado"
+            return True, "Vehículo registrado con éxito"
         except Exception as e:
-            return False, f"Error al registrar el Vehiculo {e}"
+            return False, f"Error al registrar el Vehículo: {e}"
 
-    def EliminarVehiculo(self, idVehiculo):
+    def EliminarVehiculo(self, idvehiculo):
+        print(f"Eliminando vehiculo con id: {idvehiculo}")
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
-            cursor = db.cursor()
+            cursor = db.cursor() 
             sql = "DELETE FROM VEHICULOS WHERE ID_VEHICULO = %s"
-            cursor.execute(sql, (idVehiculo,))
+            cursor.execute(sql, (idvehiculo,))
             db.commit()
             cursor.close()
-            conexion.CerrarConnection()
+            self.modelo.CerrarConnection()
             return True, "Vehiculo eliminado"
         except Exception as e:
             return False, f"Error al eliminar el Vehiculo {e}"
@@ -68,7 +72,6 @@ class VehiculoRepository():
             cursor = conn.cursor()
             vehiculo_repo = VehiculoRepository()
             cursor.execute("UPDATE Vehiculos SET Estado = 'Alquilado' WHERE idVehiculo = %s", (idVehiculo,))
-
         except Exception as e:
             return False, "no se puedo alquilar el vehiculo"
         finally:
@@ -84,7 +87,7 @@ class VehiculoRepository():
             filas = cursor.fetchall()
             return [
                 {
-                    "id":     f[0],
+                    "id":     int(f[0]),
                     "placa": str(f[0]),
                     "marca":  f[1],
                     "modelo": f[2],

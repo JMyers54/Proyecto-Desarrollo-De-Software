@@ -140,14 +140,18 @@ def registro_vehiculo():
 def registrar_vehiculo_post():
     if "admin" not in session:
         return redirect(url_for("login"))
-    IdVehiculo = request.form['IdVehiculo']
+    
+    id = request.form['Id_Vehiculo']  
     Marca = request.form['Marca']
     Modelo = request.form['Modelo']
     Año = request.form['Año']
     Tipo = request.form['Tipo']
     Precio_diario = request.form['Precio_diario']
     Estado = request.form['Estado']
-    success, message = vehiculo_repo.RegistroVehiculos(IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado)
+    
+
+    success, message = vehiculo_repo.RegistroVehiculos(id,Marca, Modelo, Año, Tipo, Precio_diario, Estado)
+    
     flash(message)
     if success:
         return redirect(url_for("admin"))
@@ -198,29 +202,55 @@ def api_empleados():
 def vista_alquilar():
     return render_template('AlquilarVehiculo.html')
 
-@app.route('/api/vehiculos/actualizar', methods=['POST'])
-def actualizar_vehiculo():
+# =========================================================================
+# NUEVAS RUTAS CORREGIDAS PARA LA EDICIÓN Y ELIMINACIÓN DE VEHÍCULOS
+# =========================================================================
+
+# 1. MOSTRAR EL FORMULARIO DE EDICIÓN CON LOS DATOS YA CARGADOS
+@app.route('/api/vehiculos/actualizar/<idVehiculo>', methods=['GET'])
+def form_actualizar_vehiculo(idVehiculo):
+    if "admin" not in session:
+        return redirect(url_for("login"))
+    # Buscamos el vehículo actual usando tu servicio para pasárselo a la plantilla
+    # Nota: Si tu listar_vehiculos devuelve una lista de diccionarios, lo filtramos así:
+    todos = vehiculo_service.listar_vehiculos()
+    # Buscamos coincidencia ya sea por string o número de ID según tu base de datos
+    carro = next((c for c in todos if str(c.get('id') or c.get('IdVehiculo')) == str(idVehiculo)), None)
+    if not carro:
+        flash("Vehículo no encontrado.")
+        return redirect(url_for("vista_inventario"))
+    # Renderiza la interfaz oscura que acabamos de crear pasándole el objeto 'carro'
+    return render_template("editar_vehiculo.html", carro=carro)
+
+
+# 2. PROCESAR EL GUARDADO DE LOS CAMBIOS (DESDE EL FORMULARIO POST)
+@app.route('/api/vehiculos/guardar/<idVehiculo>', methods=['POST'])
+def guardar_actualizacion_vehiculo(idVehiculo):
+    if 'admin' not in session:
+        return redirect(url_for("login"))
+    # Capturamos los datos enviados por el formulario HTML estructurado
+    # Mapeamos las llaves ('name') con lo que espera tu repositorio:
+    marca = request.form.get('marca')
+    modelo = request.form.get('modelo')
+    año = request.form.get('año')
+    tipo = request.form.get('tipo')
+    precio_diario = request.form.get('precio')  # viene como 'precio' en el HTML
+    estado = request.form.get('estado')
+    # Llamamos a tu método del repositorio
+    ok, message = vehiculo_repo.ActualizarVehiculo(idVehiculo, marca, modelo, año, tipo, precio_diario, estado)
+    flash(message)
+    return redirect(url_for("vista_inventario"))
+
+# 3. ELIMINAR VEHÍCULO ASÍNCRONAMENTE (LLAMADO POR EL FETCH DE JAVASCRIPT)
+@app.route('/api/vehiculos/eliminar/<idVehiculo>', methods=['POST'])
+def eliminar_vehiculo_api(idVehiculo):
     if 'admin' not in session:
         return jsonify({"error": "No autorizado"}), 401
-    data = request.get_json(force=True)
-    ok, message = vehiculo_repo.ActualizarVehiculo(
-        data['idVehiculo'], data['marca'], data['modelo'], 
-        data['año'], data['tipo'], data['precio_diario'], data['estado']
-    )
+    ok, message = vehiculo_service.eliminaVehiculo(idVehiculo)
     if ok:
-        return jsonify({"message": message})
+        return jsonify({"message": message}), 200
     return jsonify({"error": message}), 500
 
-@app.route('/api/vehiculos/eliminar', methods=['POST'])
-def eliminar_vehiculo():
-    if 'admin' not in session:
-        return jsonify({"error": "No autorizado"}), 401
-    data = request.get_json(force=True)
-    ok, message = vehiculo_repo.EliminarVehiculo(
-        data['idVehiculo']
-    )
-    if ok:
-        return jsonify({"message": message})
-    return jsonify({"error": message}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

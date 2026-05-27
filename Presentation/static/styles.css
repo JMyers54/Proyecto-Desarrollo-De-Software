@@ -449,7 +449,7 @@ main {
     border-collapse: collapse;
     font-size: 14px;
     font-family: sans-serif;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .inv-page  th {
@@ -473,6 +473,15 @@ main {
 .col-tipo   { width: 90px; }
 .col-precio { width: 120px; }
 .col-estado { width: 130px; }
+.col-accion { width: 100px; }
+
+/* Botones  accion */
+.row-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+}
 
 .inv-page tbody tr {
     border-bottom: 0.5px solid var(--border);
@@ -613,4 +622,161 @@ main {
     .stats       { grid-template-columns: repeat(2, 1fr); }
     .detail-grid { grid-template-columns: repeat(2, 1fr); }
     .toolbar     { flex-wrap: wrap; }
+}
+/* =============================================
+    VENTANA DE ACTUALIZACIÓN / EDICIÓN DE VEHÍCULOS
+   ============================================= */
+
+/* Centrado general en la página de edición */
+.edit-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    padding: 2rem;
+}
+
+/* Tarjeta contenedora con tu estilo de relieve e iluminación inverso */
+.edit-container {
+    background-color: #2c2c2c;
+    width: 100%;
+    max-width: 800px;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+                inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+}
+
+/* Encabezado */
+.edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.edit-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+/* Botón X de cerrar */
+.btn-icon-close {
+    background: none;
+    border: none;
+    color: #b8b8b8;
+    font-size: 22px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.btn-icon-close:hover {
+    color: #ef4254; /* Cambia a tu color rojo de cancelar al pasar el mouse */
+}
+
+/* Distribución en Grid de los campos */
+.edit-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.edit-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Manejo de espacios */
+.edit-grid .span-2 { grid-column: span 2; }
+.edit-grid .span-4 { grid-column: span 4; }
+
+/* Etiquetas de los inputs */
+.edit-group label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Cajas de texto idénticas a tu clase .input del login */
+.edit-input {
+    width: 100%;
+    min-height: 42px;
+    color: #fff;
+    outline: none;
+    transition: 0.35s;
+    padding: 8px 12px;
+    background-color: #212121;
+    border-radius: 6px;
+    border: 2px solid #212121;
+    font-size: 14px;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
+                1px 1px 5px rgba(255, 255, 255, 0.4);
+}
+
+.edit-input::placeholder {
+    color: #666;
+}
+
+/* Efecto focus idéntico a tus inputs nativos */
+.edit-input:focus {
+    transform: scale(1.02);
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
+                1px 1px 5px rgba(255, 255, 255, 0.4),
+                inset 2px 2px 10px rgba(0, 0, 0, 1),
+                inset -1px -1px 5px rgba(255, 255, 255, 0.6);
+}
+
+/* Parche para selects oscuros */
+.select-custom {
+    cursor: pointer;
+}
+
+/* Parche para textareas */
+.textarea-custom {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Alineación de botones inferiores */
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.edit-actions .btn-volver,
+.edit-actions .btn-accion {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+}
+
+.edit-actions .btn-accion:hover {
+    transform: scale(1.05);
+    background-color: #555fe0; /* Pequeño cambio sutil al hover */
+}
+
+.edit-actions .btn-volver:hover {
+    transform: scale(1.05);
+}
+
+/* Adaptación para pantallas medianas o celulares */
+@media (max-width: 768px) {
+    .edit-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .edit-grid .span-2, .edit-grid .span-4 {
+        grid-column: span 2;
+    }
 }

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Vehículo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <div class="edit-page">
+        <div class="edit-container">
+            
+            <div class="edit-header">
+                <h2>Editar: {{ carro.marca }} {{ carro.modelo }} — {{ carro.placa }}</h2>
+                <a href="/inventario" class="btn-icon-close" title="Cancelar y volver">
+                    <i class="ti ti-x"></i>
+                </a>
+            </div>
+
+            <form class="edit-form" action="/api/vehiculos/guardar/{{ carro.id }}" method="POST">
+                <div class="edit-grid">
+                    
+                    <div class="edit-group">
+                        <label for="placa">Placa</label>
+                        <input type="text" id="placa" name="placa" class="edit-input" value="{{ carro.placa }}" required>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="marca">Marca</label>
+                        <input type="text" id="marca" name="marca" class="edit-input" value="{{ carro.marca }}" required>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="modelo">Modelo</label>
+                        <input type="text" id="modelo" name="modelo" class="edit-input" value="{{ carro.modelo }}" required>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="anio">Año</label>
+                        <input type="number" id="anio" name="año" class="edit-input" value="{{ carro.año }}" required>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="color">Color</label>
+                        <input type="text" id="color" name="color" class="edit-input" value="{{ carro.color if carro.color else '' }}" placeholder="Ej. Azul">
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="tipo">Tipo</label>
+                        <input type="text" id="tipo" name="tipo" class="edit-input" value="{{ carro.tipo }}" required>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="estado">Estado</label>
+                        <select id="estado" name="estado" class="edit-input select-custom">
+                            <option value="Disponible" {% if carro.estado == 'Disponible' %}selected{% endif %}>Disponible</option>
+                            <option value="Ocupado" {% if carro.estado == 'Ocupado' %}selected{% endif %}>Ocupado</option>
+                            <option value="Mantenimiento" {% if carro.estado == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                        </select>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="precio">Precio ($)</label>
+                        <input type="number" id="precio" name="precio" class="edit-input" value="{{ carro.precio }}" required>
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="kilometraje">Kilometraje (km)</label>
+                        <input type="number" id="kilometraje" name="km" class="edit-input" value="{{ carro.km if carro.km else 0 }}">
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="combustible">Combustible</label>
+                        <input type="text" id="combustible" name="combustible" class="edit-input" value="{{ carro.combustible if carro.combustible else '' }}" placeholder="Ej. Gasolina">
+                    </div>
+
+                    <div class="edit-group span-2">
+                        <label for="transmision">Transmisión</label>
+                        <input type="text" id="transmision" name="transmision" class="edit-input" value="{{ carro.transmision if carro.transmision else '' }}" placeholder="Ej. Mecánica">
+                    </div>
+
+                    <div class="edit-group">
+                        <label for="motor">Motor</label>
+                        <input type="text" id="motor" name="motor" class="edit-input" value="{{ carro.motor if carro.motor else '' }}" placeholder="Ej. 2000 cc">
+                    </div>
+
+                    <div class="edit-group span-4">
+                        <label for="observaciones">Observaciones</label>
+                        <textarea id="observaciones" name="obs" class="edit-input textarea-custom" placeholder="Sin observaciones">{{ carro.obs if carro.obs else '' }}</textarea>
+                    </div>
+
+                </div>
+
+                <div class="edit-actions">
+                    <a href="/inventario" class="btn-volver">Cancelar</a>
+                    <button type="submit" class="btn-accion">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
