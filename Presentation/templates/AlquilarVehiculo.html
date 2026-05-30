@@ -1,24 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Alquilar Vehículo</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Alquiler</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
 <body>
     <header>
         <nav>
-            <h1>Alquilar Vehículo</h1>
-            <a href="/admin" class="btn-volver">Volver al panel</s></a>
+            <h1>Panel Alquiler</h1>
+            <a href="/cliente" class="btn-volver">Volver al panel</a>
         </nav>
     </header>
-    <main>
-        <section class="alquiler">
-            <h2>Selecciona un vehículo para alquilar</h2>
-            <!-- Aquí puedes agregar un formulario o una lista de vehículos disponibles para alquilar -->
-            <p>Aquí se mostrarán los vehículos disponibles para alquilar.</p>
-        </section>
-    </main>
+    <div class="catalogo-container">
+        {% for vehiculo in vehiculos %}  
+        <div class="tarjeta-vehiculo">
+            
+            <div class="imagen-box">
+                <img src="{{ url_for('static', filename='uploads/' ~ vehiculo.IMAGEN) }}" alt="{{ vehiculo.MARCA }} {{ vehiculo.MODELO }}">
+                
+                <span class="badge-estado {% if vehiculo.ESTADO == 'Disponible' %}disponible{% else %}reservado{% endif %}">
+                    {{ vehiculo.Estado | upper }}
+                </span>
+            </div>
+
+            <div class="info-box">
+                <h3>{{ vehiculo.Tipo }} {{ vehiculo.Marca }} {{ vehiculo.Modelo }}</h3>
+                <p class="detalles-tecnicos">Año: {{ vehiculo.Aaño }} • Transmisión estándar</p>
+                
+                <div class="precio-box">
+                    <span class="label-precio">Precio por día:</span>
+                    <span class="monto-precio">${{ "{:,.0f}".format(vehiculo.PRECIO_POR_DIA)}} COP</span>
+                </div>
+
+                <form method="post" action="/verificar_disponibilidad/{{ vehiculo.ID_VEHICULO }}">
+                    <label for="fecha_consulta_{{ vehiculo.ID_VEHICULO }}">VERIFICAR DISPONIBILIDAD:</label>
+                    <div class="input-fecha-wrapper">
+                        <input type="date" id="fecha_consulta_{{ vehiculo.ID_VEHICULO }}" name="fecha_consulta" required>
+                    </div>
+                    <button type="submit" class="btn-consultar">Consultar Fecha</button>
+                </form>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
 </body>
 </html>

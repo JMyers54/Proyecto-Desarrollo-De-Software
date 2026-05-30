@@ -5,88 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Vehiculo - Alquiler de Vehículos</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #262627;
-            color: white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            background-color: #3a3a3c;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            width: 400px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            margin-bottom: 5px;
-        }
-
-        input {
-            padding: 8px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 10px;
-            background-color: #848489;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        button:hover {
-            background-color: #6a6a6d;
-        }
-
-        .back-link {
-            text-align: center;
-        }
-
-        .back-link a {
-            color: #848489;
-            text-decoration: none;
-        }
-
-        .back-link a:hover {
-            text-decoration: underline;
-        }
-
-        .flash {
-            color: #ffcccc;
-            margin-bottom: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
-    <div class="container">
-        <h1>Registro de Vehiculos</h1>
+    <div class="registro-box-container">
+        <h1>Registro de Vehículos</h1>
+        
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <div class="flash">
+        <div class="flash-mensaje-box">
             <ul>
                 {% for message in messages %}
                 <li>{{ message }}</li>
@@ -95,32 +23,62 @@
         </div>
         {% endif %}
         {% endwith %}
-        <form method="post" action="/registro_vehiculo">
-            <label for="Id_Vehiculo">ID del Vehículo:</label>
-            <input type="text" id="Id_Vehiculo" name="Id_Vehiculo" required>
 
-            <label for="Marca">Marca:</label>
-            <input type="text" id="Marca" name="Marca" required>
+        <form method="post" action="/registro_vehiculo" enctype="multipart/form-data">
+            
+            <div class="formulario-grid-interno">
+                
+                <div class="grupo-campo">
+                    <label for="Marca">Marca</label>
+                    <input type="text" id="Marca" name="Marca" placeholder="Ej: Toyota" required>
+                </div>
 
-            <label for="Modelo">Modelo:</label>
-            <input type="text" id="Modelo" name="Modelo" required>
+                <div class="grupo-campo">
+                    <label for="Modelo">Modelo</label>
+                    <input type="text" id="Modelo" name="Modelo" placeholder="Ej: Corolla" required>
+                </div>
 
-            <label for="Año">Año:</label>
-            <input type="text" id="Año" name="Año" required>
+                <div class="grupo-campo">
+                    <label for="Año">Año</label>
+                    <input type="number" id="Año" name="Año" placeholder="2024" required>
+                </div>
 
-            <label for="Tipo">Tipo:</label>
-            <input type="text" id="Tipo" name="Tipo" required>
+                <div class="grupo-campo">
+                    <label for="Tipo">Tipo</label>
+                    <select id="Tipo" name="Tipo" required>
+                        <option value="" disabled selected hidden>Selecciona...</option>
+                        <option value="Sedán">Sedán</option>
+                        <option value="Camioneta 4x4">Camioneta 4x4</option>
+                        <option value="Deportivo">Deportivo</option>
+                        <option value="Hatchback">Hatchback</option>
+                    </select>
+                </div>
 
-            <label for="Precio_diario">Precio por Día:</label>
-            <input type="text" id="Precio_diario" name="Precio_diario" required>
+                <div class="grupo-campo">
+                    <label for="Precio_diario">Precio / Día</label>
+                    <input type="number" id="Precio_diario" name="Precio_diario" placeholder="COP" required>
+                </div>
 
-            <label for="Estado">Estado:</label>
-            <input type="text" id="Estado" name="Estado" required>
+                <div class="grupo-campo">
+                    <label for="Estado">Estado</label>
+                    <select id="Estado" name="Estado" required>
+                        <option value="Disponible">Disponible</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                    </select>
+                </div>
 
-            <button  type="submit">Registrar</button>
+                <div class="grupo-campo ancho-completo">
+                    <label for="Imagen">Imagen del Vehículo</label>
+                    <input type="file" id="Imagen" name="Imagen" accept="image/*" required>
+                </div>
+
+                <button type="submit" class="btn-registrar-box ancho-completo">Registrar Vehículo</button>
+            </div>
+
         </form>
-        <div class="back-link">
-            <a href="/admin" class="btn-volver">Volver al Panel</a>
+        
+        <div class="link-retorno-box">
+            <a href="/admin">Volver al Panel</a>
         </div>
     </div>
 </body>

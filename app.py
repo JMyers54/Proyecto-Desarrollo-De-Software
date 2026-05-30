@@ -7,6 +7,9 @@ from DAL.Infrastructure.ConexionDB import ConexionDB
 from Application.Services.ServicesVehiculos import ServicesVehiculos
 from Application.Services.ServicesCliente import ServicesCliente
 from Application.Services.ServicesEmpleado import ServicesEmpleado
+import os
+from werkzeug.utils import secure_filename
+
 app = Flask(__name__, template_folder='Presentation/templates', static_folder='Presentation/static')   
 app.secret_key = 'your_secret_key_here'  # Cambia esto por una clave secreta segura
 
@@ -18,12 +21,10 @@ vehiculo_repo = VehiculoRepository(None, modelo)
 vehiculo_service = ServicesVehiculos(modelo)
 empleado_service = ServicesEmpleado(modelo)
 cliente_service = ServicesCliente(modelo)
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# selección de rol para inicio de sesión
 @app.route('/login')
 def login():
     return render_template('seleccionar_rol.html')
@@ -57,28 +58,24 @@ def login_rol(rol):
     
     return render_template('login.html', rol=rol)
 
-#incio de sesión para admin
 @app.route('/admin')
 def admin():
     if 'admin' not in session:
         return redirect(url_for('login'))
     return render_template('admin.html')
 
-#Inicio de sesión para empleados
 @app.route('/empleado')
 def empleado():
     if 'empleado' not in session:
         return redirect(url_for('login'))
     return render_template('empleado.html')
 
-#Inicio de sesión para clientes
 @app.route('/cliente')
 def cliente():
     if 'cliente' not in session:
         return redirect(url_for('login'))
     return render_template('cliente.html')
 
-#Registro de empleado solo para admin
 @app.route('/registrar_empleado')
 def registrar_form():
     if 'admin' not in session:
@@ -103,7 +100,6 @@ def registrar():
     else:
         return redirect(url_for('registrar_form'))
 
-#Registro de cliente solo para empleados
 @app.route("/registrar_cliente")
 def registrar_cliente():
     if "empleado" not in session:
@@ -127,37 +123,33 @@ def registrar_clien():
         return redirect(url_for("empleado"))
     else: 
         return redirect(url_for("registrar_cliente"))
-    
 
-#Registro de vehiculo solo para admin
-@app.route("/registro_vehiculo")
+@app.route("/registro_vehiculo", methods=["GET", "POST"])
 def registro_vehiculo():
     if "admin" not in session:
         return redirect(url_for("login"))
+    if request.method == "POST":
+        Marca = request.form["Marca"]
+        Modelo = request.form["Modelo"]
+        Año = request.form["Año"]
+        Tipo = request.form["Tipo"]
+        Precio_diario = request.form["Precio_diario"]
+        Estado = request.form["Estado"]
+        archivo_foto = request.files.get("Imagen")
+        nombre_final_imagen = "default.jpg"
+        if archivo_foto and archivo_foto.filename != "":
+            nombre_final_imagen = secure_filename(archivo_foto.filename)
+            carpeta_uploads = os.path.join(app.root_path,"static","uploads")
+            os.makedirs(carpeta_uploads, exist_ok=True)
+            ruta_imagen = os.path.join(carpeta_uploads,nombre_final_imagen)
+            archivo_foto.save(ruta_imagen)
+        success, message = vehiculo_repo.RegistroVehiculos( Marca, Modelo, Año, Tipo, Precio_diario, Estado, nombre_final_imagen)
+        flash(message)
+        if success:
+            return redirect(url_for("admin"))
+        return redirect(url_for("registro_vehiculo"))
     return render_template("registerVehiculo.html")
 
-@app.route("/registro_vehiculo", methods=["POST"])
-def registrar_vehiculo_post():
-    if "admin" not in session:
-        return redirect(url_for("login"))
-    
-    id = request.form['Id_Vehiculo']  
-    Marca = request.form['Marca']
-    Modelo = request.form['Modelo']
-    Año = request.form['Año']
-    Tipo = request.form['Tipo']
-    Precio_diario = request.form['Precio_diario']
-    Estado = request.form['Estado']
-    
-
-    success, message = vehiculo_repo.RegistroVehiculos(id,Marca, Modelo, Año, Tipo, Precio_diario, Estado)
-    
-    flash(message)
-    if success:
-        return redirect(url_for("admin"))
-    else: 
-        return redirect(url_for("registro_vehiculo"))
-    
 @app.route('/logout')
 def logout():
     session.pop('admin', None)
@@ -197,52 +189,42 @@ def api_empleados():
         return jsonify(empleado_service.listar_empleados())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-#Alquiler de vehículos para clientes
-@app.route('/alquilar')
-def vista_alquilar():
-    return render_template('AlquilarVehiculo.html')
 
 # =========================================================================
 # NUEVAS RUTAS CORREGIDAS PARA LA EDICIÓN Y ELIMINACIÓN DE VEHÍCULOS
-# =========================================================================
-
-# 1. MOSTRAR EL FORMULARIO DE EDICIÓN CON LOS DATOS YA CARGADOS
 @app.route('/api/vehiculos/actualizar/<idVehiculo>', methods=['GET'])
 def form_actualizar_vehiculo(idVehiculo):
     if "admin" not in session:
         return redirect(url_for("login"))
-    # Buscamos el vehículo actual usando tu servicio para pasárselo a la plantilla
-    # Nota: Si tu listar_vehiculos devuelve una lista de diccionarios, lo filtramos así:
     todos = vehiculo_service.listar_vehiculos()
-    # Buscamos coincidencia ya sea por string o número de ID según tu base de datos
-    carro = next((c for c in todos if str(c.get('id') or c.get('IdVehiculo')) == str(idVehiculo)), None)
+    carro = next((c for c in todos if str(c.get('id') or c.get('IdVehiculo')) == str(idVehiculo)), None)#coincidencias en el iD
     if not carro:
         flash("Vehículo no encontrado.")
         return redirect(url_for("vista_inventario"))
-    # Renderiza la interfaz oscura que acabamos de crear pasándole el objeto 'carro'
-    return render_template("editar_vehiculo.html", carro=carro)
+    return render_template("ActualizarVehiculo.html", carro=carro)    # Renderiza la interfaz oscura que acabamos de crear pasándole el objeto 'carro'
 
-
-# 2. PROCESAR EL GUARDADO DE LOS CAMBIOS (DESDE EL FORMULARIO POST)
 @app.route('/api/vehiculos/guardar/<idVehiculo>', methods=['POST'])
 def guardar_actualizacion_vehiculo(idVehiculo):
     if 'admin' not in session:
         return redirect(url_for("login"))
-    # Capturamos los datos enviados por el formulario HTML estructurado
-    # Mapeamos las llaves ('name') con lo que espera tu repositorio:
+
     marca = request.form.get('marca')
     modelo = request.form.get('modelo')
     año = request.form.get('año')
+    color = request.form.get('color')
     tipo = request.form.get('tipo')
-    precio_diario = request.form.get('precio')  # viene como 'precio' en el HTML
+    precio_diario = request.form.get('precio')
     estado = request.form.get('estado')
-    # Llamamos a tu método del repositorio
-    ok, message = vehiculo_repo.ActualizarVehiculo(idVehiculo, marca, modelo, año, tipo, precio_diario, estado)
+    km = request.form.get('km')
+    combustible = request.form.get('combustible')
+    transmision = request.form.get('transmision')
+    motor = request.form.get('motor')
+    observaciones = request.form.get('observaciones')
+    ok, message = vehiculo_repo.ActualizarVehiculo(idVehiculo,marca,modelo,año, color,tipo,precio_diario,estado,km,combustible,transmision,motor,observaciones)
     flash(message)
     return redirect(url_for("vista_inventario"))
 
-# 3. ELIMINAR VEHÍCULO ASÍNCRONAMENTE (LLAMADO POR EL FETCH DE JAVASCRIPT)
-@app.route('/api/vehiculos/eliminar/<idVehiculo>', methods=['POST'])
+@app.route('/api/vehiculos/eliminar/<idVehiculo>', methods=['POST'])# 3. ELIMINAR VEHÍCULO ASÍNCRONAMENTE (LLAMADO POR EL FETCH DE JAVASCRIPT)
 def eliminar_vehiculo_api(idVehiculo):
     if 'admin' not in session:
         return jsonify({"error": "No autorizado"}), 401
@@ -251,6 +233,10 @@ def eliminar_vehiculo_api(idVehiculo):
         return jsonify({"message": message}), 200
     return jsonify({"error": message}), 500
 
+@app.route('/alquilar', methods=['GET'])
+def vista_alquilar(): 
+    lista_carros = vehiculo_repo.obtener_todos_los_vehiculos()  
+    return render_template('alquilarVehiculo.html', vehiculos=lista_carros)#le damos la lista al html
 
 if __name__ == '__main__':
     app.run(debug=True)

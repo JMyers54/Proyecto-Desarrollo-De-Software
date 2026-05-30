@@ -6,7 +6,6 @@ body {
     padding: 0;
     background-color: #212121;
     color: #b8b8b8;
-
 }
 
 header {
@@ -144,25 +143,22 @@ main {
 
 
 /* =============================================
-    NUEVO LOGIN ANIMADO (reemplaza .login anterior)
+    NUEVO LOGIN ANIMADO
    ============================================= */
 
-/* Wrapper que centra el formulario en la página */
 .login {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 60vh; /* ocupa la mayor parte de la pantalla */
+    min-height: 60vh;
 }
 
-/* Contenedor del flip card */
 .container {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* El formulario con efecto 3D */
 .form {
     display: flex;
     justify-content: center;
@@ -174,7 +170,6 @@ main {
     position: relative;
 }
 
-/* Cara delantera del formulario */
 .form .form_front {
     display: flex;
     flex-direction: column;
@@ -190,10 +185,9 @@ main {
     border-radius: 15px;
     box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
         inset -1px -1px 5px rgba(255, 255, 255, 0.6);
-    background-color: #2c2c2c; /* fondo oscuro para que se vea bien */
+    background-color: #2c2c2c;
 }
 
-/* Cara trasera del formulario (registro, si la usas) */
 .form .form_back {
     display: flex;
     flex-direction: column;
@@ -210,7 +204,6 @@ main {
     background-color: #2c2c2c;
 }
 
-/* Título del formulario */
 .form_details {
     font-size: 25px;
     font-weight: 600;
@@ -218,7 +211,6 @@ main {
     color: white;
 }
 
-/* Campos de texto del nuevo login */
 .input {
     width: 245px;
     min-height: 45px;
@@ -250,7 +242,6 @@ main {
         inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
-/* Botón del nuevo login */
 .btn {
     padding: 10px 35px;
     cursor: pointer;
@@ -281,7 +272,6 @@ main {
         inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
-/* Texto de cambio entre login y registro */
 .form .switch {
     font-size: 13px;
     color: white;
@@ -293,28 +283,24 @@ main {
     text-decoration: underline;
 }
 
-/* Checkbox oculto que activa el giro */
 .container #signup_toggle {
     display: none;
 }
 
-/* Cuando el checkbox está marcado, el formulario gira */
 .container #signup_toggle:checked + .form {
     transform: rotateY(-180deg);
 }
 
-/* INVENTARIO*/
-/* ── RESET & BASE ─────────────────────────────────────────────────────────── */
+/* INVENTARIO */
 .inv-page {
     max-width: 900px;
     margin: 0 auto;
-    padding: 2rem 3rem;  /* aumenta el padding lateral */
+    padding: 2rem 3rem;
 }
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    
 }
 
 :root {
@@ -337,7 +323,6 @@ main {
     --info-bg:       #e6f1fb;
     --radius:        8px;
     --radius-lg:     12px;
-
 }
 
 .stats body {
@@ -346,14 +331,13 @@ main {
     font-size: 15px;
     color: #212121;
 }   
-/* ── LAYOUT ───────────────────────────────────────────────────────────────── */
+
 .inv-page .page {
     max-width: 1100px;
     margin: 0 auto;
     padding: 2rem 1.5rem;
 }
 
-/* ── HEADER ───────────────────────────────────────────────────────────────── */
 .inv-page .page-header {
     display: flex;
     justify-content: space-between;
@@ -377,7 +361,6 @@ main {
     font-family: sans-serif;
 }
 
-/* ── STATS ────────────────────────────────────────────────────────────────── */
 .inv-page .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -406,14 +389,12 @@ main {
     margin-top: 4px;
 }
 
-/* ── TOOLBAR ──────────────────────────────────────────────────────────────── */
 .inv-page .toolbar {
     display: flex;
     gap: 10px;
     margin-bottom: 1rem;
     align-items: center;
 }
-
 
 .inv-page .toolbar input,
 .inv-page .toolbar select {
@@ -436,7 +417,6 @@ main {
     box-shadow: 0 0 0 2px rgba(26, 74, 138, 0.12);
 }
 
-/* ── TABLA ────────────────────────────────────────────────────────────────── */
 .inv-page .table-wrap {
     background: var(--surface);
     border: 0.5px solid var(--border);
@@ -452,7 +432,7 @@ main {
     table-layout: auto;
 }
 
-.inv-page  th {
+.inv-page th {
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -464,7 +444,6 @@ main {
     border-bottom: 0.5px solid var(--border);
 }
 
-/* Anchos de columna */
 .col-placa  { width: 100px; }
 .col-marca  { width: 120px; }
 .col-modelo { width: 130px; }
@@ -475,7 +454,6 @@ main {
 .col-estado { width: 130px; }
 .col-accion { width: 100px; }
 
-/* Botones  accion */
 .row-actions {
     display: flex;
     flex-direction: row;
@@ -507,7 +485,6 @@ main {
     font-size: 13px;
 }
 
-/* ── BADGES ───────────────────────────────────────────────────────────────── */
 .inv-page .badge {
     display: inline-block;
     font-size: 11px;
@@ -523,7 +500,6 @@ main {
 .inv-page .b-Mantenimiento { background: var(--warning-bg); color: var(--warning); }
 .inv-page .b-Reservado     { background: var(--info-bg);    color: var(--info); }
 
-/* ── BOTÓN ICONO (cerrar detalle) ─────────────────────────────────────────── */
 .inv-page .btn-icon {
     background: none;
     border: none;
@@ -539,7 +515,6 @@ main {
 
 .inv-page .btn-icon:hover { background: var(--surface2); color: var(--text); }
 
-/* ── PANEL DE DETALLE ─────────────────────────────────────────────────────── */
 .inv-page .detail-panel {
     display: none;
     margin-top: 1.25rem;
@@ -590,7 +565,6 @@ main {
 
 .inv-page .detail-item.wide { grid-column: 1 / -1; }
 
-/* ── EMPTY / LOADING ──────────────────────────────────────────────────────── */
 .inv-page .empty-row td {
     text-align: center;
     padding: 3rem;
@@ -598,7 +572,6 @@ main {
     font-family: sans-serif;
 }
 
-/* ── TOAST ────────────────────────────────────────────────────────────────── */
 .inv-page #toast {
     position: fixed;
     bottom: 1.5rem;
@@ -617,17 +590,16 @@ main {
 
 #toast.show { opacity: 1; }
 
-/* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .stats       { grid-template-columns: repeat(2, 1fr); }
     .detail-grid { grid-template-columns: repeat(2, 1fr); }
     .toolbar     { flex-wrap: wrap; }
 }
+
 /* =============================================
-    VENTANA DE ACTUALIZACIÓN / EDICIÓN DE VEHÍCULOS
+    EDICIÓN DE VEHÍCULOS
    ============================================= */
 
-/* Centrado general en la página de edición */
 .edit-page {
     display: flex;
     justify-content: center;
@@ -636,7 +608,6 @@ main {
     padding: 2rem;
 }
 
-/* Tarjeta contenedora con tu estilo de relieve e iluminación inverso */
 .edit-container {
     background-color: #2c2c2c;
     width: 100%;
@@ -647,7 +618,6 @@ main {
                 inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
-/* Encabezado */
 .edit-header {
     display: flex;
     justify-content: space-between;
@@ -663,7 +633,6 @@ main {
     color: #ffffff;
 }
 
-/* Botón X de cerrar */
 .btn-icon-close {
     background: none;
     border: none;
@@ -675,10 +644,9 @@ main {
 }
 
 .btn-icon-close:hover {
-    color: #ef4254; /* Cambia a tu color rojo de cancelar al pasar el mouse */
+    color: #ef4254;
 }
 
-/* Distribución en Grid de los campos */
 .edit-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -691,11 +659,9 @@ main {
     flex-direction: column;
 }
 
-/* Manejo de espacios */
 .edit-grid .span-2 { grid-column: span 2; }
 .edit-grid .span-4 { grid-column: span 4; }
 
-/* Etiquetas de los inputs */
 .edit-group label {
     font-size: 12px;
     font-weight: bold;
@@ -705,7 +671,6 @@ main {
     letter-spacing: 0.5px;
 }
 
-/* Cajas de texto idénticas a tu clase .input del login */
 .edit-input {
     width: 100%;
     min-height: 42px;
@@ -725,7 +690,6 @@ main {
     color: #666;
 }
 
-/* Efecto focus idéntico a tus inputs nativos */
 .edit-input:focus {
     transform: scale(1.02);
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
@@ -734,18 +698,9 @@ main {
                 inset -1px -1px 5px rgba(255, 255, 255, 0.6);
 }
 
-/* Parche para selects oscuros */
-.select-custom {
-    cursor: pointer;
-}
+.select-custom { cursor: pointer; }
+.textarea-custom { resize: vertical; min-height: 80px; }
 
-/* Parche para textareas */
-.textarea-custom {
-    resize: vertical;
-    min-height: 80px;
-}
-
-/* Alineación de botones inferiores */
 .edit-actions {
     display: flex;
     justify-content: flex-end;
@@ -764,19 +719,317 @@ main {
 
 .edit-actions .btn-accion:hover {
     transform: scale(1.05);
-    background-color: #555fe0; /* Pequeño cambio sutil al hover */
+    background-color: #555fe0;
 }
 
 .edit-actions .btn-volver:hover {
     transform: scale(1.05);
 }
 
-/* Adaptación para pantallas medianas o celulares */
 @media (max-width: 768px) {
-    .edit-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .edit-grid .span-2, .edit-grid .span-4 {
-        grid-column: span 2;
-    }
+    .edit-grid { grid-template-columns: repeat(2, 1fr); }
+    .edit-grid .span-2, .edit-grid .span-4 { grid-column: span 2; }
+}
+
+/* ========================================== */
+/* ESTILOS DEL CATÁLOGO DE VEHÍCULOS       */
+/* ========================================== */
+
+/* Título superior central */
+.titulo-catalogo {
+    text-align: center;
+    color: #a5a5a8;
+    font-size: 24px;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* Contenedor que agrupa las tarjetas en filas y columnas */
+.catalogo-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 30px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Estructura de la tarjeta */
+.tarjeta-vehiculo {
+    background-color: #2c2c2c;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+}
+
+.tarjeta-vehiculo:hover {
+    transform: translateY(-5px);
+}
+
+/* Zona de la imagen con posicionamiento relativo para las etiquetas */
+.imagen-box {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background-color: #1a1a1a;
+}
+
+.imagen-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Etiquetas de estado (Disponible / Reservado) */
+.badge-estado {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.badge-estado.disponible {
+    background-color: rgba(16, 38, 18, 0.9);
+    color: #52c41a;
+    border: 1px solid #237804;
+}
+
+.badge-estado.reservado {
+    background-color: rgba(27, 38, 59, 0.9);
+    color: #40a9ff;
+    border: 1px solid #096dd9;
+}
+
+/* Caja de contenido e información */
+.info-box {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.info-box h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.detalles-tecnicos {
+    color: #757577;
+    font-size: 13px;
+    margin: 0 0 20px 0;
+}
+
+/* Fila de precio */
+.precio-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.label-precio {
+    color: #8c8c8e;
+    font-size: 14px;
+}
+
+.monto-precio {
+    color: #597ef7;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Formulario interno de consulta */
+.info-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.info-box form label {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* Input de fecha estilizado en bajo relieve */
+.input-fecha-wrapper input[type="date"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #1f1f1f;
+    border: none;
+    border-radius: 6px;
+    color: #ffffff;
+    font-family: inherit;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+}
+
+/* Botón Consultar Fecha */
+.btn-consultar {
+    background-color: #597ef7;
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: 5px;
+}
+
+.btn-consultar:hover {
+    background-color: #4065e0;
+}
+
+.btn-consultar:active {
+    transform: scale(0.98);
+}
+/* =========================================================================
+    EXCLUSIVO: FORMULARIO DE REGISTRO EN PAREJAS (GRID DE 2 COLUMNAS)
+   ========================================================================= */
+
+/* Caja contenedora vertical centrada (Estilo similar a tus paneles compactos) */
+.registro-box-container {
+    background-color: #2c2c2c;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 1),
+                inset -1px -1px 5px rgba(255, 255, 255, 0.5);
+    width: 100%;
+    max-width: 460px; /* Centrado y tamaño controlado */
+    margin: 40px auto;
+    box-sizing: border-box;
+}
+
+.registro-box-container h1 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+/* CORREGIDO: Apunta exactamente a la clase del contenedor de registro */
+.registro-box-container .formulario-grid-interno {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 15px; 
+    row-gap: 12px;    
+}
+
+.grupo-campo {
+    display: flex;
+    flex-direction: column;
+}
+
+/* CORREGIDO: Forzado de ancho completo exclusivo para esta sección */
+.registro-box-container .ancho-completo {
+    grid-column: span 2;
+}
+
+.grupo-campo label {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #b3b3b3;
+}
+
+/* Inputs estilizados con relieve neumórfico para el registro */
+.formulario-grid-interno input, 
+.formulario-grid-interno select {
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #212121;
+    color: white;
+    outline: none;
+    font-size: 13px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
+                1px 1px 4px rgba(255, 255, 255, 0.3);
+    width: 100%;
+    box-sizing: border-box;
+    height: 38px;
+}
+
+.formulario-grid-interno input:focus, 
+.formulario-grid-interno select:focus {
+    transform: translateY(-1px);
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
+                1px 1px 4px rgba(255, 255, 255, 0.3),
+                inset 2px 2px 8px rgba(0, 0, 0, 1),
+                inset -1px -1px 4px rgba(255, 255, 255, 0.4);
+}
+
+.formulario-grid-interno input[type="file"] {
+    padding: 8px 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Botón registrar del módulo */
+.btn-registrar-box {
+    height: 40px;
+    background-color: #212121;
+    color: white;
+    border: 2px solid #212121;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    transition: 0.2s ease;
+    margin-top: 10px;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
+                1px 1px 4px rgba(255, 255, 255, 0.3);
+}
+
+.btn-registrar-box:hover {
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8),
+                1px 1px 4px rgba(255, 255, 255, 0.3),
+                inset 2px 2px 8px rgba(0, 0, 0, 1),
+                inset -1px -1px 4px rgba(255, 255, 255, 0.4);
+}
+
+.link-retorno-box {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.link-retorno-box a {
+    color: #848489;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.link-retorno-box a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+.flash-mensaje-box {
+    background-color: rgba(255, 204, 204, 0.1);
+    color: #ffcccc;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 204, 204, 0.15);
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.flash-mensaje-box ul {
+    margin: 0;
+    padding-left: 20px;
 }
