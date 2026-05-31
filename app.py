@@ -9,6 +9,7 @@ from Application.Services.ServicesCliente import ServicesCliente
 from Application.Services.ServicesEmpleado import ServicesEmpleado
 import os
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 app = Flask(__name__, template_folder='Presentation/templates', static_folder='Presentation/static')   
 app.secret_key = 'your_secret_key_here'  # Cambia esto por una clave secreta segura
@@ -233,10 +234,98 @@ def eliminar_vehiculo_api(idVehiculo):
         return jsonify({"message": message}), 200
     return jsonify({"error": message}), 500
 
-@app.route('/alquilar', methods=['GET'])
+@app.route('/alquilar/Inventario', methods=['GET'])
 def vista_alquilar(): 
     lista_carros = vehiculo_repo.obtener_todos_los_vehiculos()  
     return render_template('alquilarVehiculo.html', vehiculos=lista_carros)#le damos la lista al html
+
+@app.route('/no_disponible')
+def form_no_disponible():
+    return render_template('no_disponible.html')
+
+@app.route('/alquilar/<int:idVehiculo>')
+def VehiculoDisponible(idVehiculo):
+    vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
+    return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo)
+
+@app.route('/verificar_disponibilidad/<int:idVehiculo>', methods=['POST'])
+def verificar_disponibilidad(idVehiculo):
+    # 1. Asegurar que haya un cliente en sesión utilizando la clave correcta del login
+    if 'cliente' not in session:
+        flash("Debes iniciar sesión como cliente para poder alquilar un vehículo.")
+        return redirect(url_for('login'))
+        
+    id_cliente = session.get('cliente')
+    fecha_inicio = request.form['fecha_inicio']
+    fecha_fin = request.form['fecha_fin']
+    
+    # 2. Validar disponibilidad en el rango de fechas
+    disponible = vehiculo_repo.VerificarDisponibilidad(idVehiculo, fecha_inicio, fecha_fin)
+    if disponible > 0:
+        return redirect(url_for('form_no_disponible'))
+        
+    # 3. Obtener el vehículo para conocer su precio por día
+    vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
+    if not vehiculo:
+        flash("El vehículo seleccionado no existe.")
+        return redirect(url_for('vista_alquilar'))
+        
+    precio_dia = float(vehiculo[2])
+    
+    # 4. Calcular la cantidad de días del alquiler
+    inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+    fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+    dias = (fin - inicio).days + 1
+    
+    # Calcular el total base inicial
+    total = dias * precio_dia
+    
+    # 5. REGLA DE NEGOCIO: Aplicar descuento del 10% si tiene 5 o más alquileres anteriores
+    cantidad_alquileres = cliente_repo.contar_alquileres_cliente(id_cliente)
+    if cantidad_alquileres >= 5:
+        total = total * 0.90  # Aplica el 10% de descuento reduciendo el monto al 90%
+        flash("¡Felicidades! Se ha aplicado un 10% de descuento automático por ser cliente frecuente.")
+        
+    # 6. Guardar el alquiler con el total ya rebajado y actualizar el estado del carro
+    cliente_repo.alquilar_vehiculo(id_cliente, idVehiculo, fecha_inicio, fecha_fin, total)
+    vehiculo_repo.AlquilaVehiculo(idVehiculo)
+    
+    return redirect(url_for('VehiculoDisponible', idVehiculo=idVehiculo))
+
+
+@app.route('/confirmar_alquiler/<int:idVehiculo>', methods=['POST'])
+def confirmar_alquiler(idVehiculo):
+    # 1. Asegurar la sesión del cliente
+    if 'cliente' not in session:
+        return "No autorizado. Inicie sesión.", 401
+        
+    id_cliente = session.get('cliente')
+    fecha_inicio = request.form['fecha_inicio']
+    fecha_fin = request.form['fecha_fin']
+    
+    # 2. Obtener precio diario del vehículo
+    vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
+    if not vehiculo:
+        return "Vehículo no encontrado", 404
+        
+    precio_dia = float(vehiculo[2])
+    
+    # 3. Calcular los días y el monto total base
+    inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+    fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+    dias = (fin - inicio).days + 1
+    total = dias * precio_dia
+    
+    # 4. REGLA DE NEGOCIO: Validar historial para el beneficio del 10%
+    cantidad_alquileres = cliente_repo.contar_alquileres_cliente(id_cliente)
+    if cantidad_alquileres >= 5:
+        total = total * 0.90
+        
+    # 5. Persistir datos en la base de datos
+    cliente_repo.alquilar_vehiculo(id_cliente, idVehiculo, fecha_inicio, fecha_fin, total)
+    vehiculo_repo.AlquilaVehiculo(idVehiculo)
+    
+    return "Alquiler registrado correctamente"
 
 if __name__ == '__main__':
     app.run(debug=True)

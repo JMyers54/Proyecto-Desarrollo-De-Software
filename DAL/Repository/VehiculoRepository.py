@@ -56,23 +56,24 @@ class VehiculoRepository():
 
     def obtener_vehiculos(conn):
         cursor = conn.cursor()
-        cursor.execute("""
-            SELECT IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado FROM Vehiculos""")
+        cursor.execute("""SELECT IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado FROM Vehiculos""")
         return cursor.fetchall()
 
-    def AlquilaVehiculo(idVehiculo):
+    def AlquilaVehiculo(self, idVehiculo):
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             conn = conexion.getConnection()
             cursor = conn.cursor()
-            vehiculo_repo = VehiculoRepository()
-            cursor.execute("UPDATE Vehiculos SET Estado = 'Alquilado' WHERE idVehiculo = %s", (idVehiculo,))
-        except Exception as e:
-            return False, "no se puedo alquilar el vehiculo"
-        finally:
+            sql = "UPDATE Vehiculos SET Estado = 'Alquilado' WHERE Id_Vehiculo = %s"
+            cursor.execute(sql, (idVehiculo,))
+            conn.commit()
+            cursor.close()
             conexion.CerrarConnection()
-
+            return True
+        except Exception as e:
+            print("ERROR:", e)
+            return False
     def mostrar_vehiculos(self):
         try:
             conexion = ConexionDB()
@@ -115,3 +116,31 @@ class VehiculoRepository():
         cursor.close()
         db.CerrarConnection()
         return lista_carros
+
+    def VerificarDisponibilidad(self, idVehiculo, fecha_inicio, fecha_fin):
+        conexion = ConexionDB()
+        conexion.CrearConnection()
+        db = conexion.getConnection()
+        cursor = db.cursor()
+        sql = """SELECT COUNT(*) FROM Alquileres WHERE Id_Vehiculo = %s AND (%s <= Fecha_Fin AND %s >= Fecha_Inicio)"""
+        cursor.execute(sql, (idVehiculo, fecha_fin, fecha_inicio))
+        resultado = cursor.fetchone()[0]
+        cursor.close()
+        conexion.CerrarConnection()
+        return resultado
+
+    def ObtenerVehiculoPorId(self, idVehiculo):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            sql = "SELECT Marca, Modelo, Precio_Por_Dia FROM Vehiculos WHERE Id_Vehiculo = %s"
+            cursor.execute(sql, (idVehiculo,))
+            vehiculo = cursor.fetchone()
+            cursor.close()
+            conexion.CerrarConnection()
+            return vehiculo
+        except Exception as e:
+            print("Error:", e)
+            return None

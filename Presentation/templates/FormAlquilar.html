@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alquilar Vehículo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="registro-box-container">
+        <h1>Alquiler de Vehículo</h1>
+        <!-- Mensajes flash (opcional) -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-mensaje-box">
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" action="/verificar_disponibilidad/{{ idVehiculo }}">
+            <div class="formulario-grid-interno">
+                <!-- Información del vehículo -->
+                <div class="grupo-campo ancho-completo">
+                    <label>Vehículo</label>
+                    <input type="text" 
+                        value="{{ vehiculo[0] }} {{ vehiculo[1] }}" 
+                        disabled>
+                </div>
+                <!-- Fecha inicio -->
+                <div class="grupo-campo">
+                    <label for="fecha_inicio">Fecha inicio</label>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+                </div>
+                <!-- Fecha fin -->
+                <div class="grupo-campo">
+                    <label for="fecha_fin">Fecha fin</label>
+                    <input type="date" id="fecha_fin" name="fecha_fin" required>
+                </div>
+                <!-- ID oculto -->
+                <input type="hidden" name="idVehiculo" value="{{ idVehiculo }}">
+                <!-- Botón -->
+                <button type="submit" class="btn-registrar-box ancho-completo"> Confirmar alquiler </button>
+            </div>
+        </form>
+        <!-- retorno -->
+        <div class="link-retorno-box">
+            <a href="/inventario">Volver al catálogo</a>
+        </div>
+    </div>
+</body>
+</html>

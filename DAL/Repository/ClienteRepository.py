@@ -48,13 +48,22 @@ class ClienteRepository():
         """)
         return cursor.fetchall()
     
-    def alquilar_vehiculo(conn, id_cliente, id_vehiculo, fecha_inicio, fecha_fin):
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO alquileres (Id_Cliente, Id_Vehiculo, Fecha_Inicio, Fecha_Fin)
-            VALUES (%s, %s, %s, %s)
-        """, (id_cliente, id_vehiculo, fecha_inicio, fecha_fin))
-        conn.commit()
+    def alquilar_vehiculo(self, id_cliente, id_vehiculo, fecha_inicio, fecha_fin, total):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            sql = """
+            INSERT INTO ALQUILERES (ID_CLIENTE, ID_VEHICULO, FECHA_INICIO, FECHA_FIN, TOTAL) VALUES (%s, %s, %s, %s, %s)"""
+            cursor.execute(sql, (id_cliente,id_vehiculo,fecha_inicio, fecha_fin,total))
+            db.commit()
+            cursor.close()
+            conexion.CerrarConnection()
+            return True
+        except Exception as e:
+            print("Error:", e)
+            return False
 
     def mostrar_clientes(self):
             try:
@@ -80,3 +89,15 @@ class ClienteRepository():
                 raise e
             finally:
                 self.modelo.CerrarConnection()
+
+    def contar_alquileres_cliente(self, id_cliente):
+        conexion = ConexionDB()
+        conexion.CrearConnection()
+        db = conexion.getConnection()
+        cursor = db.cursor()
+        sql = """SELECT COUNT(*)FROM ALQUILERES WHERE ID_CLIENTE = %s"""
+        cursor.execute(sql, (id_cliente,))
+        cantidad = cursor.fetchone()[0]
+        cursor.close()
+        conexion.CerrarConnection()
+        return cantidad
