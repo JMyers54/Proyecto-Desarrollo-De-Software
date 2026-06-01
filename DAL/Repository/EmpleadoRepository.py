@@ -72,3 +72,85 @@ class EmpleadoRepository():
             raise e
         finally:
             self.modelo.CerrarConnection()
+
+    def ObtenerEstadisticasAsesor(self, id_empleado):
+            """Devuelve el total de carros alquilados y el total de clientes únicos atendidos"""
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                cursor = db.cursor()
+                
+                # 1. Cuántos carros ha alquilado bajo su asesoría
+                sql_carros = "SELECT COUNT(*) FROM ALQUILERES WHERE ID_EMPLEADO = %s"
+                cursor.execute(sql_carros, (id_empleado,))
+                total_carros = cursor.fetchone()[0]
+                
+                # 2. Cuántos clientes únicos han alquilado con él
+                sql_clientes = "SELECT COUNT(DISTINCT ID_CLIENTE) FROM ALQUILERES WHERE ID_EMPLEADO = %s"
+                cursor.execute(sql_clientes, (id_empleado,))
+                total_clientes = cursor.fetchone()[0]
+                
+                cursor.close()
+                conexion.CerrarConnection()
+                
+                return {
+                    'total_carros': total_carros,
+                    'total_clientes': total_clientes
+                }
+            except Exception as e:
+                print("Error en estadísticas del asesor:", e)
+                return {'total_carros': 0, 'total_clientes': 0}
+
+    def ObtenerHistorialAlquileres(self, id_empleado):
+        """Devuelve las filas detalladas para armar la tabla del historial"""
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            
+            # Consulta con JOINs para traer los nombres reales del cliente y los datos del carro
+            sql = """
+                SELECT 
+                    A.ID_ALQUILER,
+                    C.NOMBRE AS NOMBRE_CLIENTE,
+                    C.APELLIDO AS APELLIDO_CLIENTE,
+                    V.MARCA,
+                    V.MODELO,
+                    A.FECHA_INICIO,
+                    A.FECHA_FIN,
+                    A.TOTAL
+                FROM ALQUILERES A
+                INNER JOIN CLIENTES C ON A.ID_CLIENTE = C.ID_CLIENTE
+                INNER JOIN VEHICULOS V ON A.ID_VEHICULO = V.ID_VEHICULO
+                WHERE A.ID_EMPLEADO = %s
+                ORDER BY A.FECHA_INICIO DESC
+            """
+            cursor.execute(sql, (id_empleado,))
+            historial = cursor.fetchall()
+            
+            cursor.close()
+            conexion.CerrarConnection()
+            return historial
+        except Exception as e:
+            print("Error al obtener historial:", e)
+            return []
+
+    def obtener_asesores_disponibles(self):
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                cursor = db.cursor()
+                sql = "SELECT IdEmpleado, Nombre, Apellido FROM empleado ORDER BY Nombre ASC"
+                cursor.execute(sql)
+                asesores = cursor.fetchall()
+                cursor.close()
+                conexion.CerrarConnection()
+                return asesores
+            except Exception as e:
+                print("\n" + "!"*40)
+                print(f"ERROR CRÍTICO EN EMPLEADOREPOSITORY: {e}")
+                print("!"*40 + "\n")
+                return []

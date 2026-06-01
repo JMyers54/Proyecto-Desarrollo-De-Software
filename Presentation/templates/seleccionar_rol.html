@@ -1,12 +1,10 @@
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seleccionar Rol</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-
 <body>
     <header>
         <nav>
@@ -14,17 +12,29 @@
             <a href="{{ url_for('index') }}" class="btn-volver">Volver al Inicio</a>
         </nav>
     </header>
-    <main>
-        <section class="seleccionar-rol">
-            <h2>Seleccionar Rol</h2>
-            <p>Elige tu rol para iniciar sesión:</p>
-            <div class="roles">
-                <a href="{{ url_for('login_rol', rol='admin') }}" class="btn-rol">Administrador</a>
-                <a href="{{ url_for('login_rol', rol='empleado') }}" class="btn-rol">Empleado</a>
-                <a href="{{ url_for('login_rol', rol='cliente') }}" class="btn-rol">Cliente</a>
-            </div>
-        </section>
+
+    <!-- FONDO DE VEHÍCULOS -->
+    <div class="rol-fondo">
+        {% for vehiculo in vehiculos %}
+        <div class="rol-fondo-tarjeta">
+            <img src="{{ url_for('static', filename='uploads/' ~ vehiculo.IMAGEN) }}"
+                 alt="{{ vehiculo.MARCA }}">
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- OVERLAY OSCURO -->
+    <div class="rol-overlay"></div>
+
+    <!-- CONTENIDO CENTRAL -->
+    <main class="rol-main">
+        <h2>Seleccionar Rol</h2>
+        <p>Elige tu rol para iniciar sesión</p>
+        <div class="roles">
+            <a href="{{ url_for('login_rol', rol='admin') }}" class="btn-rol">Administrador</a>
+            <a href="{{ url_for('login_rol', rol='empleado') }}" class="btn-rol">Empleado</a>
+            <a href="{{ url_for('login_rol', rol='cliente') }}" class="btn-rol">Cliente</a>
+        </div>
     </main>
 </body>
-
 </html>

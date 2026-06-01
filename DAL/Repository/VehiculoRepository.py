@@ -59,21 +59,25 @@ class VehiculoRepository():
         cursor.execute("""SELECT IdVehiculo, Marca, Modelo, Año, Tipo, Precio_diario, Estado FROM Vehiculos""")
         return cursor.fetchall()
 
-    def AlquilaVehiculo(self, idVehiculo):
-        try:
-            conexion = ConexionDB()
-            conexion.CrearConnection()
-            conn = conexion.getConnection()
-            cursor = conn.cursor()
-            sql = "UPDATE Vehiculos SET Estado = 'Alquilado' WHERE Id_Vehiculo = %s"
-            cursor.execute(sql, (idVehiculo,))
-            conn.commit()
-            cursor.close()
-            conexion.CerrarConnection()
-            return True
-        except Exception as e:
-            print("ERROR:", e)
-            return False
+    def AlquilaVehiculo(self, id_cliente, id_vehiculo, id_empleado, fecha_inicio, fecha_fin, total):
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                cursor = db.cursor()
+                sql = """
+                    INSERT INTO ALQUILERES (ID_CLIENTE, ID_VEHICULO, ID_EMPLEADO, FECHA_INICIO, FECHA_FIN, TOTAL) 
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(sql, (id_cliente, id_vehiculo, id_empleado, fecha_inicio, fecha_fin, total))
+                db.commit()
+                cursor.close()
+                conexion.CerrarConnection()
+                return True
+            except Exception as e:
+                print("ERROR AL GUARDAR ALQUILER:", e)
+                return False
+
     def mostrar_vehiculos(self):
         try:
             conexion = ConexionDB()
@@ -118,16 +122,25 @@ class VehiculoRepository():
         return lista_carros
 
     def VerificarDisponibilidad(self, idVehiculo, fecha_inicio, fecha_fin):
-        conexion = ConexionDB()
-        conexion.CrearConnection()
-        db = conexion.getConnection()
-        cursor = db.cursor()
-        sql = """SELECT COUNT(*) FROM Alquileres WHERE Id_Vehiculo = %s AND (%s <= Fecha_Fin AND %s >= Fecha_Inicio)"""
-        cursor.execute(sql, (idVehiculo, fecha_fin, fecha_inicio))
-        resultado = cursor.fetchone()[0]
-        cursor.close()
-        conexion.CerrarConnection()
-        return resultado
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                cursor = db.cursor()
+                # LÓGICA INFALIBLE PARA FECHAS CONSECUTIVAS:
+                # Un vehículo NO está disponible si el rango solicitado se solapa con uno existente.
+                # Se cruzan si: la fecha_inicio solicitada es MENOR o IGUAL a la FECHA_FIN existente
+                # Y la fecha_fin solicitada es MAYOR o IGUAL a la FECHA_INICIO existente.
+                sql = """SELECT COUNT(*) FROM ALQUILERES WHERE ID_VEHICULO = %s AND (%s <= FECHA_FIN AND %s >= FECHA_INICIO)"""
+                # Pasamos los parámetros en el orden exacto de la consulta:
+                cursor.execute(sql, (idVehiculo, fecha_inicio, fecha_fin))
+                resultado = cursor.fetchone()[0]
+                cursor.close()
+                conexion.CerrarConnection()
+                return resultado
+            except Exception as e:
+                print("ERROR EN VERIFICAR_DISPONIBILIDAD:", e)
+                return 0
 
     def ObtenerVehiculoPorId(self, idVehiculo):
         try:

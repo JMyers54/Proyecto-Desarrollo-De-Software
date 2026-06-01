@@ -44,16 +44,19 @@
     </table>
     </div>
 
-    <!-- PANEL DE DETALLE -->
-    <div class="detail-panel" id="detail-panel">
+<!-- PANEL DE DETALLE -->
+<div class="detail-panel" id="detail-panel">
     <div class="detail-header">
         <h3 id="detail-title">Detalle</h3>
         <button class="btn-icon" onclick="closeDetail()" title="Cerrar">
-        <i class="ti ti-x"></i>
+            <i class="ti ti-x"></i>
         </button>
     </div>
     <div class="detail-grid" id="detail-grid"></div>
+    <div id="historial-box" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 0.5px solid var(--border);">
+        <p style="color: var(--text-muted); font-size:13px;">Cargando historial…</p>
     </div>
+</div>
 
 </div><!-- /page -->
 
@@ -112,8 +115,7 @@
         </tr>`).join("");
     }
 
-  /* ── DETALLE ── */
-    function showDetail(id) {
+function showDetail(id) {
     const c = clientes.find(x => x.id === id);
     if (!c) return;
     selectedId = id;
@@ -126,9 +128,40 @@
         <div class="detail-item"><label>Región</label><span>${c.region || "—"}</span></div>
         <div class="detail-item"><label>Teléfono</label><span>${c.telefono || "—"}</span></div>
         <div class="detail-item"><label>Email</label><span>${c.email || "—"}</span></div>`;
-    document.getElementById("detail-panel").classList.add("open");
-    }
 
+    // Historial de alquileres
+    fetch(`/api/cliente/historial/${id}`)
+        .then(r => r.json())
+        .then(historial => {
+            const contenido = historial.length === 0
+                ? `<p style="color: var(--text-muted); font-size:13px;">Sin alquileres registrados.</p>`
+                : `<table style="width:100%; font-size:13px; border-collapse:collapse; margin-top:8px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <th style="text-align:left; padding:6px; font-size:11px; color:var(--text-muted);">VEHÍCULO</th>
+                            <th style="text-align:left; padding:6px; font-size:11px; color:var(--text-muted);">FECHA INICIO</th>
+                            <th style="text-align:left; padding:6px; font-size:11px; color:var(--text-muted);">FECHA FIN</th>
+                            <th style="text-align:left; padding:6px; font-size:11px; color:var(--text-muted);">ASESOR</th>
+                            <th style="text-align:left; padding:6px; font-size:11px; color:var(--text-muted);">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${historial.map(h => `
+                        <tr style="border-bottom: 0.5px solid var(--border);">
+                            <td style="padding:6px;">${h.marca} ${h.modelo}</td>
+                            <td style="padding:6px;">${h.fecha_inicio}</td>
+                            <td style="padding:6px;">${h.fecha_fin}</td>
+                            <td style="padding:6px;">${h.asesor}</td>
+                            <td style="padding:6px;">$${Number(h.total).toLocaleString()}</td>
+                        </tr>`).join("")}
+                    </tbody>
+                    </table>`;
+
+            document.getElementById("historial-box").innerHTML = contenido;
+        });
+
+    document.getElementById("detail-panel").classList.add("open");
+}
     function closeDetail() {
     selectedId = null;
     document.getElementById("detail-panel").classList.remove("open");

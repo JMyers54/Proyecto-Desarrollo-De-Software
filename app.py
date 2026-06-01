@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session,jsonify, Response
 from DAL.Repository.AdminRepository import AdminRepository
 from DAL.Repository.EmpleadoRepository import EmpleadoRepository
 from DAL.Repository.ClienteRepository import ClienteRepository
@@ -24,11 +24,13 @@ empleado_service = ServicesEmpleado(modelo)
 cliente_service = ServicesCliente(modelo)
 @app.route('/')
 def index():
-    return render_template('index.html')
+    lista_carros = vehiculo_repo.obtener_todos_los_vehiculos()
+    return render_template('index.html', vehiculos=lista_carros)
 
 @app.route('/login')
 def login():
-    return render_template('seleccionar_rol.html')
+    lista_carros = vehiculo_repo.obtener_todos_los_vehiculos()
+    return render_template('seleccionar_rol.html', vehiculos=lista_carros)
 
 @app.route('/login/<rol>', methods=['GET', 'POST'])
 def login_rol(rol):
@@ -234,23 +236,31 @@ def eliminar_vehiculo_api(idVehiculo):
         return jsonify({"message": message}), 200
     return jsonify({"error": message}), 500
 
+# =========================================================================
+# RUTAS DE ALQUILER CORREGIDAS
+# =========================================================================
+
 @app.route('/alquilar/Inventario', methods=['GET'])
 def vista_alquilar(): 
+    # Mantenemos tu consulta, idealmente esto debería pasar por un servicio en el futuro
     lista_carros = vehiculo_repo.obtener_todos_los_vehiculos()  
-    return render_template('alquilarVehiculo.html', vehiculos=lista_carros)#le damos la lista al html
+    return render_template('alquilarVehiculo.html', vehiculos=lista_carros)
 
 @app.route('/no_disponible')
 def form_no_disponible():
     return render_template('no_disponible.html')
 
-@app.route('/alquilar/<int:idVehiculo>')
+@app.route('/alquilar/<int:idVehiculo>', methods=['GET', 'POST'])
 def VehiculoDisponible(idVehiculo):
     vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
-    return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo)
+    lista_empleados = empleado_repo.obtener_asesores_disponibles()  # PASAMOS None PARA OBTENER TODOS LOS EMPLEADOS DISPONIBLES  
+    return render_template('FormAlquilar.html', 
+                            idVehiculo=idVehiculo, 
+                            vehiculo=vehiculo, 
+                            lista_empleados=lista_empleados) # Evitamos confusiones de nombres
 
 @app.route('/verificar_disponibilidad/<int:idVehiculo>', methods=['POST'])
 def verificar_disponibilidad(idVehiculo):
-    # 1. Asegurar que haya un cliente en sesión utilizando la clave correcta del login
     if 'cliente' not in session:
         flash("Debes iniciar sesión como cliente para poder alquilar un vehículo.")
         return redirect(url_for('login'))
@@ -258,74 +268,173 @@ def verificar_disponibilidad(idVehiculo):
     id_cliente = session.get('cliente')
     fecha_inicio = request.form['fecha_inicio']
     fecha_fin = request.form['fecha_fin']
-    
-    # 2. Validar disponibilidad en el rango de fechas
-    disponible = vehiculo_repo.VerificarDisponibilidad(idVehiculo, fecha_inicio, fecha_fin)
-    if disponible > 0:
-        return redirect(url_for('form_no_disponible'))
-        
-    # 3. Obtener el vehículo para conocer su precio por día
+    # IMPORTANTE: Recargar los datos del vehículo y asesores por si hay que redibujar la página por un error
     vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
+    lista_asesores = empleado_repo.obtener_asesores_disponibles()  # PASAMOS EL ID DEL EMPLEADO SELECCIONADO PARA EXCLUIRLO DE LA LISTA DE ASESORES DISPONIBLES
+    # 1. Validar orden de las fechas
+    if fecha_inicio > fecha_fin:
+        flash("La fecha de inicio no puede ser posterior a la fecha de fin.")
+        # AQUÍ ESTABA EL ERROR: Se debe enviar 'lista_empleados=lista_asesores' si volvemos a pintar el formulario
+        return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo, lista_empleados=lista_asesores)
+        
+    # 2. Verificar disponibilidad real en la base de datos
+    coincidencias = vehiculo_repo.VerificarDisponibilidad(idVehiculo, fecha_inicio, fecha_fin)
+    if coincidencias > 0:
+        flash("El vehículo no está disponible para las fechas seleccionadas. Por favor, elige otro rango.")
+        # AQUÍ TAMBIÉN: Se debe re-enviar la lista de empleados
+        return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo, lista_empleados=lista_asesores)
+        
+    # 3. Si todo está correcto, proceder al cálculo del precio total
     if not vehiculo:
         flash("El vehículo seleccionado no existe.")
         return redirect(url_for('vista_alquilar'))
         
-    precio_dia = float(vehiculo[2])
-    
-    # 4. Calcular la cantidad de días del alquiler
+    try:
+        precio_dia = float(vehiculo[2]) if isinstance(vehiculo, (tuple, list)) else float(vehiculo.get('Precio_diario', 0))
+    except Exception:
+        flash("Error al procesar el precio del vehículo.")
+        return redirect(url_for('vista_alquilar'))
+        
     inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
     fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
     dias = (fin - inicio).days + 1
-    
-    # Calcular el total base inicial
     total = dias * precio_dia
     
-    # 5. REGLA DE NEGOCIO: Aplicar descuento del 10% si tiene 5 o más alquileres anteriores
     cantidad_alquileres = cliente_repo.contar_alquileres_cliente(id_cliente)
-    if cantidad_alquileres >= 5:
-        total = total * 0.90  # Aplica el 10% de descuento reduciendo el monto al 90%
-        flash("¡Felicidades! Se ha aplicado un 10% de descuento automático por ser cliente frecuente.")
-        
-    # 6. Guardar el alquiler con el total ya rebajado y actualizar el estado del carro
-    cliente_repo.alquilar_vehiculo(id_cliente, idVehiculo, fecha_inicio, fecha_fin, total)
-    vehiculo_repo.AlquilaVehiculo(idVehiculo)
-    
-    return redirect(url_for('VehiculoDisponible', idVehiculo=idVehiculo))
-
-
+    if cantidad_alquileres == 5:
+        total = total * 0.90
+        flash("¡Felicidades! Tienes un 10% de descuento automático por tu sexto alquiler.")
+    # Avanza a la pantalla de confirmación final
+    return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo, fecha_inicio=fecha_inicio, 
+                            fecha_fin=fecha_fin,dias=dias, total=total,lista_empleados=lista_asesores)
 @app.route('/confirmar_alquiler/<int:idVehiculo>', methods=['POST'])
 def confirmar_alquiler(idVehiculo):
-    # 1. Asegurar la sesión del cliente
+    print(dict(request.form))
     if 'cliente' not in session:
         return "No autorizado. Inicie sesión.", 401
         
     id_cliente = session.get('cliente')
     fecha_inicio = request.form['fecha_inicio']
     fecha_fin = request.form['fecha_fin']
+    id_empleado = request.form['IdEmpleado']
+
+    print(f"id_cliente: {id_cliente}")
+    print(f"id_empleado: {id_empleado}")
+    print(f"fecha_inicio: {fecha_inicio}")
+    print(f"fecha_fin: {fecha_fin}")
+    print(f"idVehiculo: {idVehiculo}")
+    # Volvemos a validar disponibilidad de última hora antes de guardar
+    disponible = vehiculo_repo.VerificarDisponibilidad(idVehiculo, fecha_inicio, fecha_fin)
+    if disponible > 0:
+        flash("Lo sentimos, el vehículo ya no se encuentra disponible.")
+        return redirect(url_for('VehiculoDisponible', idVehiculo=idVehiculo))
     
-    # 2. Obtener precio diario del vehículo
+    # SEGURIDAD CRÍTICA: Recalcular el total en el servidor para evitar manipulaciones en el HTML
     vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
     if not vehiculo:
-        return "Vehículo no encontrado", 404
+        flash("Error: El vehículo ya no existe.")
+        return redirect(url_for('vista_alquilar'))
         
-    precio_dia = float(vehiculo[2])
-    
-    # 3. Calcular los días y el monto total base
+    try:
+        precio_dia = float(vehiculo[2]) if isinstance(vehiculo, (tuple, list)) else float(vehiculo.get('Precio_diario', 0))
+    except Exception:
+        flash("Error interno al procesar el costo.")
+        return redirect(url_for('vista_alquilar'))
+        
     inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
     fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
     dias = (fin - inicio).days + 1
-    total = dias * precio_dia
+    total_servidor = dias * precio_dia
     
-    # 4. REGLA DE NEGOCIO: Validar historial para el beneficio del 10%
+    # Aplicar el descuento en el backend también
     cantidad_alquileres = cliente_repo.contar_alquileres_cliente(id_cliente)
-    if cantidad_alquileres >= 5:
-        total = total * 0.90
+    if cantidad_alquileres == 5:
+        total_servidor = total_servidor * 0.90
         
-    # 5. Persistir datos en la base de datos
-    cliente_repo.alquilar_vehiculo(id_cliente, idVehiculo, fecha_inicio, fecha_fin, total)
-    vehiculo_repo.AlquilaVehiculo(idVehiculo)
+    # Guardamos DEFINITIVAMENTE con el precio verificado por el servidor
+    exito = vehiculo_repo.AlquilaVehiculo(id_cliente, idVehiculo, id_empleado, fecha_inicio, fecha_fin, total_servidor)
     
-    return "Alquiler registrado correctamente"
+    if exito:
+        flash("¡Alquiler registrado con éxito!")
+    else:
+        flash("Error interno al registrar el alquiler en la base de datos.")
+        
+    return redirect(url_for('vista_inventario'))
 
+@app.route('/api/empleado/estadisticas/<id_empleado>')
+def api_estadisticas_empleado(id_empleado):
+    stats = empleado_repo.ObtenerEstadisticasAsesor(id_empleado)
+    return jsonify(stats)
+
+@app.route('/api/cliente/historial/<id_cliente>')
+def api_historial_cliente(id_cliente):
+    historial = cliente_repo.ObtenerHistorialCliente(id_cliente)
+    return jsonify(historial)
+
+@app.route('/historial_cliente')
+def historial_cliente():
+    if 'cliente' not in session:
+        return redirect(url_for('login'))
+    id_cliente = session.get('cliente')
+    historial = cliente_repo.ObtenerHistorialCliente(id_cliente)
+    return render_template('HistorialCliente.html', historial=historial)
+
+@app.route('/dashboard')
+def dashboard():
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    return render_template('dashboard.html')
+
+@app.route('/api/dashboard')
+def api_dashboard():
+    if 'admin' not in session:
+        return jsonify({"error": "No autorizado"}), 401
+    fecha_inicio = request.args.get('fecha_inicio')
+    fecha_fin = request.args.get('fecha_fin')
+    datos = cliente_repo.ObtenerDatosDashboard(fecha_inicio, fecha_fin)
+    return jsonify(datos)
+
+@app.route('/backup')
+def backup():
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    try:
+        modelo.CrearConnection()
+        conn = modelo.getConnection()
+        cursor = conn.cursor()
+
+        sql_backup = "-- Backup ALQUILER_VEHICULOS\n\n"
+
+        tablas = ['ADMIN', 'EMPLEADO', 'CLIENTES', 'VEHICULOS', 'ALQUILERES']
+
+        for tabla in tablas:
+            sql_backup += f"-- Tabla: {tabla}\n"
+            cursor.execute(f"SELECT * FROM {tabla}")
+            filas = cursor.fetchall()
+            columnas = [desc[0] for desc in cursor.description]
+
+            for fila in filas:
+                valores = []
+                for v in fila:
+                    if v is None:
+                        valores.append("NULL")
+                    elif isinstance(v, str):
+                        valores.append(f"'{v.replace(chr(39), chr(39)+chr(39))}'")
+                    else:
+                        valores.append(str(v))
+                sql_backup += f"INSERT INTO {tabla} ({', '.join(columnas)}) VALUES ({', '.join(valores)});\n"
+            sql_backup += "\n"
+
+        cursor.close()
+        modelo.CerrarConnection()
+
+        return Response(
+            sql_backup,
+            mimetype='text/plain',
+            headers={'Content-Disposition': 'attachment; filename=backup.sql'}
+        )
+    except Exception as e:
+        flash(f"Error al generar backup: {e}")
+        return redirect(url_for('admin'))
 if __name__ == '__main__':
     app.run(debug=True)

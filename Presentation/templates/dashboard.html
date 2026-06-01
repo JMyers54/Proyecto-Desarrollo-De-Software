@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Dashboard</h1>
+            <a href="/admin" class="btn-volver">Volver al panel</a>
+        </nav>
+    </header>
+
+    <div class="dash-page">
+
+        <!-- FILTROS -->
+        <div class="dash-filtros">
+            <button class="dash-btn active" onclick="filtrarPor('mes')">Este mes</button>
+            <button class="dash-btn" onclick="filtrarPor('semana')">Esta semana</button>
+            <button class="dash-btn" onclick="filtrarPor('hoy')">Hoy</button>
+            <div class="dash-separador"></div>
+            <label>Desde</label>
+            <input type="date" id="fecha-inicio" class="dash-input">
+            <label>Hasta</label>
+            <input type="date" id="fecha-fin" class="dash-input">
+            <button class="dash-btn" onclick="filtrarPersonalizado()">Aplicar</button>
+        </div>
+
+        <!-- STATS RÁPIDAS -->
+        <div class="dash-stats">
+            <div class="dash-stat">
+                <div class="dash-stat-label">Total alquileres</div>
+                <div class="dash-stat-val" id="d-total">—</div>
+            </div>
+            <div class="dash-stat">
+                <div class="dash-stat-label">Vehículo más alquilado</div>
+                <div class="dash-stat-val" id="d-top-vehiculo">—</div>
+            </div>
+            <div class="dash-stat">
+                <div class="dash-stat-label">Cliente más frecuente</div>
+                <div class="dash-stat-val" id="d-top-cliente">—</div>
+            </div>
+            <div class="dash-stat">
+                <div class="dash-stat-label">Asesor más activo</div>
+                <div class="dash-stat-val" id="d-top-asesor">—</div>
+            </div>
+        </div>
+
+        <!-- GRAFICAS -->
+        <div class="dash-graficas">
+            <div class="dash-card">
+                <h3>Vehículos más alquilados</h3>
+                <canvas id="chart-vehiculos"></canvas>
+            </div>
+            <div class="dash-card">
+                <h3>Clientes frecuentes</h3>
+                <canvas id="chart-clientes"></canvas>
+            </div>
+            <div class="dash-card">
+                <h3>Ventas por asesor</h3>
+                <canvas id="chart-asesores"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    let chartVehiculos = null;
+    let chartClientes  = null;
+    let chartAsesores  = null;
+
+    const COLORES = [
+        'rgba(105, 116, 241, 0.8)',
+        'rgba(82, 196, 26, 0.8)',
+        'rgba(239, 66, 84, 0.8)',
+        'rgba(250, 173, 20, 0.8)',
+        'rgba(24, 144, 255, 0.8)'
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => filtrarPor('mes'));
+
+    function getFechas(tipo) {
+        const hoy = new Date();
+        let inicio, fin;
+        fin = hoy.toISOString().split("T")[0];
+        if (tipo === 'hoy') {
+            inicio = fin;
+        } else if (tipo === 'semana') {
+            const d = new Date(hoy);
+            d.setDate(hoy.getDate() - 7);
+            inicio = d.toISOString().split("T")[0];
+        } else {
+            const d = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            inicio = d.toISOString().split("T")[0];
+        }
+        return { inicio, fin };
+    }
+
+    function filtrarPor(tipo) {
+        document.querySelectorAll(".dash-btn").forEach(b => b.classList.remove("active"));
+        event.target.classList.add("active");
+        const { inicio, fin } = getFechas(tipo);
+        cargarDatos(inicio, fin);
+    }
+
+    function filtrarPersonalizado() {
+        const inicio = document.getElementById("fecha-inicio").value;
+        const fin    = document.getElementById("fecha-fin").value;
+        if (!inicio || !fin) { alert("Selecciona ambas fechas."); return; }
+        document.querySelectorAll(".dash-btn").forEach(b => b.classList.remove("active"));
+        cargarDatos(inicio, fin);
+    }
+
+    async function cargarDatos(inicio, fin) {
+        try {
+            const res = await fetch(`/api/dashboard?fecha_inicio=${inicio}&fecha_fin=${fin}`);
+            const datos = await res.json();
+
+            // Stats rápidas
+            const totalAlquileres = datos.vehiculos.reduce((s, v) => s + v.total, 0);
+            document.getElementById("d-total").textContent        = totalAlquileres || "—";
+            document.getElementById("d-top-vehiculo").textContent = datos.vehiculos[0]?.nombre || "—";
+            document.getElementById("d-top-cliente").textContent  = datos.clientes[0]?.nombre  || "—";
+            document.getElementById("d-top-asesor").textContent   = datos.asesores[0]?.nombre  || "—";
+
+            // Gráficas
+            renderChart("chart-vehiculos", chartVehiculos, datos.vehiculos, "Alquileres");
+            renderChart("chart-clientes",  chartClientes,  datos.clientes,  "Alquileres");
+            renderChart("chart-asesores",  chartAsesores,  datos.asesores,  "Alquileres");
+
+        } catch (e) {
+            console.error("Error cargando dashboard:", e);
+        }
+    }
+
+function renderChart(canvasId, chartRef, datos, label) {
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    if (chartRef) chartRef.destroy();
+
+    let tipo, config;
+
+    if (canvasId === "chart-vehiculos") {
+        // BARRAS
+        config = {
+            type: "bar",
+            data: {
+                labels: datos.map(d => d.nombre),
+                datasets: [{
+                    label,
+                    data: datos.map(d => d.total),
+                    backgroundColor: COLORES,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: "#8c8c8e", font: { size: 11 } }, grid: { color: "rgba(255,255,255,0.05)" } },
+                    y: { ticks: { color: "#8c8c8e", stepSize: 1 }, grid: { color: "rgba(255,255,255,0.05)" }, beginAtZero: true }
+                }
+            }
+        };
+    } else if (canvasId === "chart-clientes") {
+        // DONA
+        config = {
+            type: "doughnut",
+            data: {
+                labels: datos.map(d => d.nombre),
+                datasets: [{
+                    data: datos.map(d => d.total),
+                    backgroundColor: COLORES,
+                    borderWidth: 2,
+                    borderColor: "#2c2c2c"
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "bottom",
+                        labels: { color: "#b8b8b8", font: { size: 11 } }
+                    }
+                }
+            }
+        };
+    } else {
+        // LÍNEA
+        config = {
+            type: "line",
+            data: {
+                labels: datos.map(d => d.nombre),
+                datasets: [{
+                    label,
+                    data: datos.map(d => d.total),
+                    borderColor: "rgba(105, 116, 241, 0.8)",
+                    backgroundColor: "rgba(105, 116, 241, 0.15)",
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: COLORES,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: "#8c8c8e", font: { size: 11 } }, grid: { color: "rgba(255,255,255,0.05)" } },
+                    y: { ticks: { color: "#8c8c8e", stepSize: 1 }, grid: { color: "rgba(255,255,255,0.05)" }, beginAtZero: true }
+                }
+            }
+        };
+    }
+
+    const chart = new Chart(ctx, config);
+    if (canvasId === "chart-vehiculos") chartVehiculos = chart;
+    if (canvasId === "chart-clientes")  chartClientes  = chart;
+    if (canvasId === "chart-asesores")  chartAsesores  = chart;
+}
+</script>
+
+</body>
+</html>

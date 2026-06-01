@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,46 +9,58 @@
 <body>
     <div class="registro-box-container">
         <h1>Alquiler de Vehículo</h1>
-        <!-- Mensajes flash (opcional) -->
+        
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <div class="flash-mensaje-box">
-            <ul>
+        <div class="flash-mensaje-box" style="margin-bottom: 20px; padding: 0; background: none; border: none;">
+            <ul style="padding: 0; margin: 0;">
                 {% for message in messages %}
-                <li>{{ message }}</li>
+                    {% if 'éxito' in message or 'Felicidades' in message %}
+                        <li class="alerta-item alerta-exito">{{ message }}</li>
+                    {% else %}
+                        <li class="alerta-item alerta-error">{{ message }}</li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
         {% endif %}
         {% endwith %}
-        <form method="POST" action="/verificar_disponibilidad/{{ idVehiculo }}">
+
+        <form method="POST" action="/confirmar_alquiler/{{ idVehiculo }}">
             <div class="formulario-grid-interno">
-                <!-- Información del vehículo -->
                 <div class="grupo-campo ancho-completo">
                     <label>Vehículo</label>
-                    <input type="text" 
-                        value="{{ vehiculo[0] }} {{ vehiculo[1] }}" 
-                        disabled>
+                    <input type="text" value="{{ vehiculo[0] }} {{ vehiculo[1] }}" disabled>
                 </div>
-                <!-- Fecha inicio -->
+
+                <div class="grupo-campo ancho-completo">
+                    <label for="IdEmpleado">Asesor que lo atendió</label>
+                        <select name="IdEmpleado" id="id_empleado" required>
+                            <option value="">Seleccione un asesor...</option>
+
+                        {% for empleado in lista_empleados %}
+                            <option value="{{ empleado[0] }}">
+                                {{ empleado[1] }} {{ empleado[2] }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <div class="grupo-campo">
                     <label for="fecha_inicio">Fecha inicio</label>
                     <input type="date" id="fecha_inicio" name="fecha_inicio" required>
                 </div>
-                <!-- Fecha fin -->
                 <div class="grupo-campo">
                     <label for="fecha_fin">Fecha fin</label>
                     <input type="date" id="fecha_fin" name="fecha_fin" required>
                 </div>
-                <!-- ID oculto -->
+                
                 <input type="hidden" name="idVehiculo" value="{{ idVehiculo }}">
-                <!-- Botón -->
                 <button type="submit" class="btn-registrar-box ancho-completo"> Confirmar alquiler </button>
             </div>
         </form>
-        <!-- retorno -->
         <div class="link-retorno-box">
-            <a href="/inventario">Volver al catálogo</a>
+            <a href="/alquilar/Inventario">Volver al catálogo</a>
         </div>
     </div>
 </body>
