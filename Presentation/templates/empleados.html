@@ -34,13 +34,12 @@
                     <th class="col-cedula">Cédula</th>
                     <th class="col-nombre">Nombre</th>
                     <th class="col-apellido">Apellido</th>
-                    <th class="col-region">Región</th>
                     <th class="col-telefono">Teléfono</th>
                     <th class="col-email">Email</th>
                 </tr>
             </thead>
             <tbody id="tbody">
-                <tr class="empty-row"><td colspan="6">Cargando…</td></tr>
+                <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
             </tbody>
         </table>
     </div>
@@ -59,7 +58,7 @@
             <h4 style="color: #ffffff; margin-bottom: 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Rendimiento de Asesoría</h4>
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
                 <div style="background-color: #212121; padding: 12px; border-radius: 6px; text-align: center; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);">
-                    <div style="font-size: 11px; color: #8c8c8e; text-transform: uppercase;">Carros Alquilados</div>
+                    <div style="font-size: 11px; color: #8c8c8e; text-transform: uppercase;">Carros Asesorados</div>
                     <div id="asesor-carros" style="font-size: 20px; font-weight: bold; color: #597ef7; margin-top: 4px;">0</div>
                 </div>
             </div>
@@ -117,7 +116,6 @@
                 <td>${e.cedula  || "—"}</td>
                 <td>${e.nombre  || "—"}</td>
                 <td>${e.apellido || "—"}</td>
-                <td>${e.region   || "—"}</td>
                 <td>${e.telefono || "—"}</td>
                 <td>${e.email || "—"}</td>
             </tr>`).join("");
@@ -135,7 +133,6 @@
             <div class="detail-item"><label>Cédula</label><span>${e.cedula || "—"}</span></div>
             <div class="detail-item"><label>Nombre</label><span>${e.nombre || "—"}</span></div>
             <div class="detail-item"><label>Apellido</label><span>${e.apellido || "—"}</span></div>
-            <div class="detail-item"><label>Región</label><span>${e.region || "—"}</span></div>
             <div class="detail-item"><label>Teléfono</label><span>${e.telefono || "—"}</span></div>
             <div class="detail-item"><label>Email</label><span>${e.email || "—"}</span></div>`;
         

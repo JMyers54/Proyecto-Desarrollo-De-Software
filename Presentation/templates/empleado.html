@@ -17,16 +17,53 @@
     </header>
     <main>
         <section class="panel">
-            <h2>Bienvenido, Empleado</h2>
+            <h2>Bienvenido, {{ nombre }}</h2>
             <p>Desde aquí puedes gestionar alquileres y clientes.</p>
             <div class="acciones">
-                <a href="#" class="btn-accion">Gestionar Alquileres</a>
+                <a href="{{ url_for('vista_inventario_empleado') }}" class="btn-accion">Gestionar Inventario</a>
                 <a href="{{ url_for('vista_clientes') }}" class="btn-accion">Ver Clientes</a>
                 <a href="{{ url_for('registrar_cliente')}}" class="btn-accion">Registrar Cliente</a>
-                <!-- Agregar más acciones aquí -->
+                </div>
+            <div class="seccion-empleado-alquileres">
+                <h3 class="titulo-seccion-emp">Mis Servicios Asignados</h3>
+                
+                <div class="contenedor-tabla-emp">
+                    <table class="tabla-alquileres-emp">
+                        <thead>
+                            <tr>
+                                <th>ID Alquiler</th>
+                                <th>Cliente</th>
+                                <th>Vehículo</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Total</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if alquileres %}
+                                {% for a in alquileres %}
+                                <tr>
+                                    <td>#{{ a[0] }}</td>
+                                    <td>{{ a[1] }} {{ a[2] }}</td>
+                                    <td>{{ a[3] }} {{ a[4] }}</td>
+                                    <td>{{ a[5] }}</td>
+                                    <td>{{ a[6] }}</td>
+                                    <td>${{ "{:,.0f}".format(a[7]) }} COP</td>
+                                    <td>
+                                        <a href="/devolucion/{{ a[0] }}" class="btn-tabla-accion" onclick="return confirm('¿Confirmas la entrega del vehículo? El sistema cambiará su estado a Disponible.');">
+                                            Registrar Devolución
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="tabla-vacia-emp">No tienes servicios de alquiler bajo tu asignación.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </section>
-    </main>
-</body>
-
 </html>

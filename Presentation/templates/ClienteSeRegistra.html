@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Cliente - Alquiler de Vehículos</title>
+    <title>Registrarse - Alquiler de Vehículos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ayuda.css') }}">
 </head>
 
 <body>
     <div class="registro-box-container">
-        <h1>Registro de Cliente</h1>
+        <h1>Registrarse</h1>
         
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -24,10 +25,9 @@
         {% endif %}
         {% endwith %}
 
-        <form method="post" action="/registrar_cliente">
+        <form method="post" action="/se_registrar_cliente">
             
             <div class="formulario-grid-interno">
-                
 
                 <div class="grupo-campo">
                     <label for="Cedula">Cédula</label>
@@ -69,15 +69,38 @@
                     <input type="date" id="FechaVencimientoLicencia" name="FechaVencimientoLicencia" min="{{ fecha_hoy }}" onkeydown="return false" required>
                 </div>
 
-                <button type="submit" class="btn-registrar-box ancho-completo">Registrar Cliente</button>
+                <button type="submit" class="btn-registrar-box ancho-completo">Registrarse</button>
             </div>
 
         </form>
         
         <div class="link-retorno-box">
-            <a href="/empleado">Volver al Panel</a>
+            <a href="/login/cliente">Volver al Login</a>
         </div>
     </div>
+
+    <!-- AYUDA CONTEXTUAL -->
+    <button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
+    <div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+        <div class="ayuda-modal">
+            <button class="ayuda-cerrar" onclick="cerrarAyuda()">×</button>
+            <div class="ayuda-titulo"><span>?</span> Creación de cuenta</div>
+            <ul class="ayuda-lista">
+                <li>La <strong>Cédula</strong> debe ser un número sin puntos ni espacios.</li>
+                <li>El <strong>Teléfono</strong> debe tener 10 dígitos (ej: 3001234567).</li>
+                <li>El <strong>Email</strong> debe tener formato válido (ej: correo@dominio.com).</li>
+                <li>La <strong>Contraseña</strong> es la que usarás para iniciar sesión.</li>
+                <li>El <strong>N° de Licencia</strong> es el código de tu licencia de conducción.</li>
+                <li>La <strong>Fecha de vencimiento</strong> no puede ser anterior a hoy.</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        function abrirAyuda()  { document.getElementById('ayuda-overlay').classList.add('abierto'); }
+        function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
+        function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
+    </script>
+
 </body>
 
 </html>

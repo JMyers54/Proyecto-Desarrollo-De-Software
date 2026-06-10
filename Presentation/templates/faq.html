@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='faq.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Preguntas Frecuentes</h1>
+            <a href="/cliente" class="btn-volver">Volver al panel</a>
+        </nav>
+    </header>
+    <main>
+        <div class="faq-container">
+            <p class="faq-intro">Encuentra respuestas rápidas a las dudas más comunes sobre el sistema.</p>
+
+            <div class="faq-grupo">
+                <h2 class="faq-categoria">Cuenta y Acceso</h2>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Cómo me registro en el sistema?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>En la pantalla de login selecciona el rol <strong>Cliente</strong> y haz clic en <em>Regístrate aquí</em>. Completa el formulario con tu cédula, nombre, apellido, teléfono, email, contraseña, número de licencia y fecha de vencimiento. Una vez enviado, podrás iniciar sesión de inmediato.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Qué hago si mi contraseña es incorrecta?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Verifica que estés usando el ID correcto y que no haya espacios en blanco. Si el problema persiste, comunícate con un asesor para que restablezca tu acceso.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Puedo actualizar mis datos personales?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Por el momento los cambios de datos personales se realizan a través de un asesor o administrador. Comunícate con ellos para actualizar tu información.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-grupo">
+                <h2 class="faq-categoria">Vehículos y Catálogo</h2>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Cómo sé si un vehículo está disponible?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Al ingresar al catálogo cada vehículo muestra su estado. Al hacer clic en <strong>Alquilar</strong>, el calendario de fechas marcará en gris los días ya ocupados — solo podrás seleccionar días libres.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Qué significa que el vehículo está "En Mantenimiento"?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>El vehículo está temporalmente fuera de servicio. No está disponible para alquiler hasta que el administrador cambie su estado. Puedes elegir otro vehículo del catálogo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-grupo">
+                <h2 class="faq-categoria">Alquileres</h2>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Cómo alquilo un vehículo?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Inicia sesión, ve a <strong>Alquilar Vehículo</strong>, elige el carro que quieres, selecciona las fechas disponibles en el calendario, elige el asesor que te atendió y confirma el alquiler.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Puedo cancelar un alquiler?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Sí, pero solo si la fecha de inicio todavía no ha llegado. Ve a <strong>Mis Alquileres</strong> y haz clic en <em>Cancelar</em> en el alquiler correspondiente. Si la fecha ya pasó o es hoy, debes comunicarte con un asesor.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Cómo funciona el descuento por cliente frecuente?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Al completar tu quinto alquiler, el sistema aplica automáticamente un <strong>10% de descuento</strong> en tu siguiente alquiler. No necesitas solicitarlo — se calcula solo al confirmar la operación.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Cómo veo mis alquileres anteriores?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Desde tu panel principal haz clic en <strong>Ver Mis Alquileres</strong>. Verás el historial completo con fechas, vehículo, asesor y total pagado.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-grupo">
+                <h2 class="faq-categoria">Contacto y Soporte</h2>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Cómo me comunico con un asesor?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Puedes acercarte directamente a las instalaciones de la empresa o comunicarte por los canales de contacto disponibles en la página principal. Un asesor te atenderá para resolver cualquier situación relacionada con tu alquiler.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-pregunta" onclick="toggleFaq(this)">
+                        ¿Qué pasa si el sistema no responde?
+                        <span class="faq-icono">+</span>
+                    </button>
+                    <div class="faq-respuesta">
+                        <p>Intenta recargar la página. Si el problema persiste, verifica tu conexión a la red local de la empresa. Si continúa, comunícate con el administrador del sistema.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function toggleFaq(btn) {
+            const respuesta = btn.nextElementSibling;
+            const icono = btn.querySelector('.faq-icono');
+            const abierto = respuesta.classList.contains('abierta');
+
+            // Cerrar todas
+            document.querySelectorAll('.faq-respuesta').forEach(r => r.classList.remove('abierta'));
+            document.querySelectorAll('.faq-icono').forEach(i => i.textContent = '+');
+
+            // Abrir la clickeada si estaba cerrada
+            if (!abierto) {
+                respuesta.classList.add('abierta');
+                icono.textContent = '−';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -22,20 +22,32 @@ class VehiculoRepository():
             return False, f"Error al registrar el Vehículo: {e}"
 
     def EliminarVehiculo(self, idvehiculo):
-        print(f"Eliminando vehiculo con id: {idvehiculo}")
-        try:
-            conexion = ConexionDB()
-            conexion.CrearConnection()
-            db = conexion.getConnection()
-            cursor = db.cursor() 
-            sql = "DELETE FROM VEHICULOS WHERE ID_VEHICULO = %s"
-            cursor.execute(sql, (idvehiculo,))
-            db.commit()
-            cursor.close()
-            self.modelo.CerrarConnection()
-            return True, "Vehiculo eliminado"
-        except Exception as e:
-            return False, f"Error al eliminar el Vehiculo {e}"
+            print(f"Eliminando vehiculo con id: {idvehiculo}")
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                cursor = db.cursor()
+
+                # RN-05: verificar alquileres activos
+                cursor.execute("""
+                    SELECT COUNT(*) FROM ALQUILERES 
+                    WHERE ID_VEHICULO = %s AND FECHA_FIN >= CURDATE()
+                """, (idvehiculo,))
+                activos = cursor.fetchone()[0]
+                if activos > 0:
+                    cursor.close()
+                    conexion.CerrarConnection()
+                    return False, f"No se puede eliminar: el vehículo tiene {activos} alquiler(es) activo(s)"
+
+                sql = "DELETE FROM VEHICULOS WHERE ID_VEHICULO = %s"
+                cursor.execute(sql, (idvehiculo,))
+                db.commit()
+                cursor.close()
+                conexion.CerrarConnection()
+                return True, "Vehículo eliminado"
+            except Exception as e:
+                return False, f"Error al eliminar el Vehículo {e}"
 
     def ActualizarVehiculo(conn,idVehiculo,marca,modelo,año,color,tipo,precio_diario,estado,km,combustible,transmision,motor,observaciones):
         try:
@@ -157,3 +169,22 @@ class VehiculoRepository():
         except Exception as e:
             print("Error:", e)
             return None
+        
+    def ObtenerFechasOcupadas(self, idVehiculo):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT DATE_FORMAT(FECHA_INICIO, '%Y-%m-%d') AS FECHA_INICIO,
+                    DATE_FORMAT(FECHA_FIN, '%Y-%m-%d')    AS FECHA_FIN
+                FROM ALQUILERES 
+                WHERE ID_VEHICULO = %s
+            """, (idVehiculo,))
+            resultado = cursor.fetchall()
+            cursor.close()
+            conexion.CerrarConnection()
+            return resultado
+        except Exception as e:
+            return []

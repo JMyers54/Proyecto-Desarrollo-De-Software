@@ -1,18 +1,23 @@
 from DAL.Infrastructure.ConexionDB import ConexionDB
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class ClienteRepository():
     def __init__(self, vista, modelo):
         self.vista = vista
         self.modelo = modelo
 
-    def RegistrarCliente(self,IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra):
+    def RegistrarCliente(self, Cedula, Nombre, Apellido, Telefono, Email, Contra, NumLicencia, FechaVencimientoLicencia):
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
-            sql = "INSERT INTO CLIENTES (ID_CLIENTE,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-            datos =(IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra)
+            cursor.execute("SELECT COALESCE(MAX(ID_CLIENTE), 0) FROM CLIENTES")
+            ultimo = int(cursor.fetchone()[0])
+            IdCliente = ultimo + 1
+            contra_hash = generate_password_hash(Contra)
+            sql = "INSERT INTO CLIENTES (ID_CLIENTE,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA,NUM_LICENCIA,FECHA_VENCIMIENTO_LICENCIA) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            datos = (IdCliente, Cedula, Nombre, Apellido, Telefono, Email, contra_hash, NumLicencia, FechaVencimientoLicencia)
             cursor.execute(sql, datos)
             db.commit()
             cursor.close()
@@ -27,19 +32,16 @@ class ClienteRepository():
             conexion.CrearConnection()
             db = conexion.getConnection()
             with db.cursor() as cursor:
-                cursor.execute("SELECT Contra FROM clientes WHERE ID_CLIENTE = %s", (id,))
+                cursor.execute("SELECT CONTRA FROM clientes WHERE ID_CLIENTE = %s", (id,))
                 resultado = cursor.fetchone()
-            
             conexion.CerrarConnection()
             if resultado is None:
                 return False, "El id no está registrado."
-            if resultado[0] == contra:
+            if check_password_hash(resultado[0], contra):
                 return True, ""
-            else:
-                return False, "Contraseña Incorrecta."
+            return False, "Contraseña incorrecta."
         except Exception as e:
             return False, f"Error al iniciar sesión: {e}"
-        
 
     def obtener_clientes(conn):
         cursor = conn.cursor()
@@ -66,29 +68,34 @@ class ClienteRepository():
             return False
 
     def mostrar_clientes(self):
-            try:
-                conexion = ConexionDB()
-                conexion.CrearConnection()
-                conn = conexion.getConnection()
-                cursor = conn.cursor()
-                cursor.execute("SELECT Id_Cliente, Cedula, Nombre, Apellido, Region, Telefono, Email FROM clientes")
-                filas = cursor.fetchall()
-                return [
-                    {
-                        "id":     f[0],
-                        "cedula": str(f[1]),
-                        "nombre": f[2],
-                        "apellido": f[3],
-                        "region": f[4],
-                        "telefono": f[5],
-                        "email": f[6]
-                    }
-                    for f in filas
-                ]
-            except Exception as e:
-                raise e
-            finally:
-                self.modelo.CerrarConnection()
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            conn = conexion.getConnection()
+            cursor = conn.cursor()
+            
+            # Traemos las columnas exactas que pintas en el HTML
+            cursor.execute("SELECT ID_CLIENTE, CEDULA, NOMBRE, APELLIDO, TELEFONO, EMAIL FROM CLIENTES")
+            filas = cursor.fetchall()
+            
+            cursor.close()
+            conexion.CerrarConnection()
+            
+            # Mapeamos con las claves exactas que busca tu plantilla Jinja2
+            return [
+                {
+                    "id":       f[0],
+                    "cedula":   str(f[1]),
+                    "nombre":   f[2],
+                    "apellido": f[3],
+                    "telefono": f[4],
+                    "email":    f[5]
+                }
+                for f in filas
+            ]
+        except Exception as e:
+            print("Error al mostrar clientes:", e)
+            return []
 
     def contar_alquileres_cliente(self, id_cliente):
         conexion = ConexionDB()
@@ -142,6 +149,32 @@ class ClienteRepository():
         except Exception as e:
             print("Error historial cliente:", e)
             return []
+    
+    def CancelarAlquiler(self, id_alquiler, id_cliente):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            # Verificar que el alquiler pertenece al cliente y que no ha iniciado
+            cursor.execute("""
+                SELECT FECHA_INICIO FROM ALQUILERES 
+                WHERE ID_ALQUILER = %s AND ID_CLIENTE = %s
+            """, (id_alquiler, id_cliente))
+            fila = cursor.fetchone()
+            if not fila:
+                return False, "Alquiler no encontrado"
+            from datetime import date
+            if fila[0] <= date.today():
+                return False, "No se puede cancelar: el alquiler ya inició o es hoy"
+            cursor.execute("DELETE FROM ALQUILERES WHERE ID_ALQUILER = %s", (id_alquiler,))
+            db.commit()
+            cursor.close()
+            conexion.CerrarConnection()
+            return True, "Alquiler cancelado correctamente"
+        except Exception as e:
+            return False, f"Error al cancelar: {e}"
+
     def ObtenerDatosDashboard(self, fecha_inicio=None, fecha_fin=None):
         try:
             conexion = ConexionDB()
@@ -194,3 +227,18 @@ class ClienteRepository():
         except Exception as e:
             print("Error dashboard:", e)
             return {"vehiculos": [], "clientes": [], "asesores": []}
+    
+    def ObtenerNombreCliente(self, id_cliente):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            with db.cursor() as cursor:
+                cursor.execute("SELECT NOMBRE, APELLIDO FROM CLIENTES WHERE ID_CLIENTE = %s", (id_cliente,))
+                fila = cursor.fetchone()
+            conexion.CerrarConnection()
+            if fila:
+                return f"{fila[0]} {fila[1]}"
+            return "Cliente"
+        except Exception as e:
+            return "Cliente"

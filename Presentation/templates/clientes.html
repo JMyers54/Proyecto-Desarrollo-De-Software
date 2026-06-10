@@ -14,7 +14,6 @@
         </nav>
     </header>
 <div class="inv-page">
-    <!-- STATS -->
     <div class="stats">
     <div class="stat">
         <div class="stat-label">Total Clientes</div>
@@ -25,7 +24,6 @@
     <input type="text" id="search" placeholder="Buscar por cédula, nombre, apellido…" oninput="renderTable()">
     </div>
 
-    <!-- TABLE -->
     <div class="table-wrap">
     <table>
         <thead>
@@ -33,18 +31,17 @@
             <th class="col-cedula">Cédula</th>
             <th class="col-nombre">Nombre</th>
             <th class="col-apellido">Apellido</th>
-            <th class="col-region">Región</th>
+
             <th class="col-telefono">Teléfono</th>
             <th class="col-email">Email</th>
         </tr>
         </thead>
         <tbody id="tbody">
-        <tr class="empty-row"><td colspan="6">Cargando…</td></tr>
+        <tr class="empty-row"><td colspan="5">Cargando…</td></tr>
         </tbody>
     </table>
     </div>
 
-<!-- PANEL DE DETALLE -->
 <div class="detail-panel" id="detail-panel">
     <div class="detail-header">
         <h3 id="detail-title">Detalle</h3>
@@ -58,10 +55,7 @@
     </div>
 </div>
 
-</div><!-- /page -->
-
-<!-- TOAST -->
-<div id="toast"></div>
+</div><div id="toast"></div>
 
 <script>
     let clientes   = [];
@@ -109,7 +103,6 @@
         <td>${c.cedula  || "—"}</td>
         <td>${c.nombre  || "—"}</td>
         <td>${c.apellido || "—"}</td>
-        <td>${c.region   || "—"}</td>
         <td>${c.telefono || "—"}</td>
         <td>${c.email || "—"}</td>
         </tr>`).join("");
@@ -125,7 +118,6 @@ function showDetail(id) {
         <div class="detail-item"><label>Cédula</label><span>${c.cedula || "—"}</span></div>
         <div class="detail-item"><label>Nombre</label><span>${c.nombre || "—"}</span></div>
         <div class="detail-item"><label>Apellido</label><span>${c.apellido || "—"}</span></div>
-        <div class="detail-item"><label>Región</label><span>${c.region || "—"}</span></div>
         <div class="detail-item"><label>Teléfono</label><span>${c.telefono || "—"}</span></div>
         <div class="detail-item"><label>Email</label><span>${c.email || "—"}</span></div>`;
 
@@ -135,7 +127,8 @@ function showDetail(id) {
         .then(historial => {
             const contenido = historial.length === 0
                 ? `<p style="color: var(--text-muted); font-size:13px;">Sin alquileres registrados.</p>`
-                : `<table style="width:100%; font-size:13px; border-collapse:collapse; margin-top:8px;">
+                : `<div class="table-wrap">
+                    <table style="width:100%; font-size:13px; border-collapse:collapse;">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--border);">
                             <th style="text-align:left; padding:6px; font-size:11px; color:var(--text-muted);">VEHÍCULO</th>
@@ -148,20 +141,22 @@ function showDetail(id) {
                     <tbody>
                         ${historial.map(h => `
                         <tr style="border-bottom: 0.5px solid var(--border);">
-                            <td style="padding:6px;">${h.marca} ${h.modelo}</td>
-                            <td style="padding:6px;">${h.fecha_inicio}</td>
-                            <td style="padding:6px;">${h.fecha_fin}</td>
-                            <td style="padding:6px;">${h.asesor}</td>
-                            <td style="padding:6px;">$${Number(h.total).toLocaleString()}</td>
+                            <td style="padding:6px; white-space: nowrap;">${h.marca} ${h.modelo}</td>
+                            <td style="padding:6px; white-space: nowrap;">${h.fecha_inicio}</td>
+                            <td style="padding:6px; white-space: nowrap;">${h.fecha_fin}</td>
+                            <td style="padding:6px; white-space: nowrap;">${h.asesor}</td>
+                            <td style="padding:6px; white-space: nowrap;">$${Number(h.total).toLocaleString()}</td>
                         </tr>`).join("")}
                     </tbody>
-                    </table>`;
+                    </table>
+                </div>`;
 
             document.getElementById("historial-box").innerHTML = contenido;
         });
 
     document.getElementById("detail-panel").classList.add("open");
 }
+
     function closeDetail() {
     selectedId = null;
     document.getElementById("detail-panel").classList.remove("open");

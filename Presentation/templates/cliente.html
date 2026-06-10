@@ -17,14 +17,51 @@
     </header>
     <main>
         <section class="panel">
-            <h2>Bienvenido, Cliente</h2>
-            <p>Desde aquí puedes ver tus alquileres y reservar vehículos.</p>
+            <h2>Bienvenido, {{ nombre }}</h2>
+            <p>Tienes <strong>{{ alquileres_activos }}</strong> alquiler(es) registrado(s).</p>
             <div class="acciones">
                 <a href="/historial_cliente" class="btn-accion">Ver Mis Alquileres</a>
                 <a href="{{ url_for('vista_alquilar') }}" class="btn-accion">Alquilar Vehículo</a>
-                <!-- Agregar más acciones aquí -->
+                <a href="/faq" class="btn-accion">Preguntas Frecuentes</a>
+                </div>
+
+            <div class="seccion-reservas-activas">
+                <h3 class="titulo-seccion">Mis Alquileres Vigentes</h3>
+
+                {% set namespace = namespace(cont=0) %}
+
+                <div class="contenedor-reservas-vigentes">
+                    {% if reservas %}
+                        {% for r in reservas %}
+                            {% set f_fin = r.fecha_fin if r.fecha_fin is defined else (r.FECHA_FIN if r.FECHA_FIN is defined else r[2]) %}
+                            {% set f_inicio = r.fecha_inicio if r.fecha_inicio is defined else (r.FECHA_INICIO if r.FECHA_INICIO is defined else r[1]) %}
+                            {% set marca = r.marca if r.marca is defined else (r.MARCA if r.MARCA is defined else r[0]) %}
+                            {% set modelo = r.modelo if r.modelo is defined else (r.MODELO if r.MODELO is defined else r[1]) %}
+                            {% set asesor = r.asesor if r.asesor is defined else (r.ASESOR if r.ASESOR is defined else r[3]) %}
+
+                            {# Si el alquiler vence hoy o en el futuro, se muestra como activo #}
+                            {% if f_fin >= hoy %}
+                                {% set namespace.cont = namespace.cont + 1 %}
+                                <div class="tarjeta-reserva-activa">
+                                    <div class="info-reserva">
+                                        <h4>{{ marca }} {{ modelo }}</h4>
+                                        <p>Desde: <span>{{ f_inicio }}</span> hasta: <span>{{ f_fin }}</span></p>
+                                    </div>
+                                    <div class="asesor-reserva">
+                                        <p>Asesor Encargado</p>
+                                        <span class="asesor-badge">{{ asesor }}</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if namespace.cont == 0 %}
+                        <p class="sin-reservas">No registras alquileres activos en este momento.</p>
+                    {% endif %}
+                </div>
             </div>
-        </section>
+            </section>
     </main>
 </body>
 

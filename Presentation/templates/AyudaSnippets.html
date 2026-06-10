@@ -1,0 +1,96 @@
+<!-- ═══════════════════════════════════════════════════════════
+     INSTRUCCIONES:
+     1. Agrega en el <head> de cada página:
+            <link rel="stylesheet" href="{{ url_for('static', filename='ayuda.css') }}">
+     2. Pega el bloque correspondiente justo antes de </body>
+     ═══════════════════════════════════════════════════════════ -->
+
+
+<!-- ── ClienteSeRegistra.html ─────────────────────────────── -->
+<button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
+<div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+    <div class="ayuda-modal">
+        <button class="ayuda-cerrar" onclick="cerrarAyuda()">×</button>
+        <div class="ayuda-titulo"><span>?</span> Creación de cuenta</div>
+        <ul class="ayuda-lista">
+            <li>La <strong>Cédula</strong> debe ser un número sin puntos ni espacios.</li>
+            <li>El <strong>Teléfono</strong> debe tener 10 dígitos (ej: 3001234567).</li>
+            <li>El <strong>Email</strong> debe tener formato válido (ej: correo@dominio.com).</li>
+            <li>La <strong>Contraseña</strong> es la que usarás para iniciar sesión.</li>
+            <li>El <strong>N° de Licencia</strong> es el código de tu licencia de conducción.</li>
+            <li>La <strong>Fecha de vencimiento</strong> no puede ser anterior a hoy.</li>
+        </ul>
+    </div>
+</div>
+<script>
+    function abrirAyuda()  { document.getElementById('ayuda-overlay').classList.add('abierto'); }
+    function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
+    function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
+</script>
+
+
+<!-- ── login.html ─────────────────────────────────────────── -->
+<button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
+<div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+    <div class="ayuda-modal">
+        <button class="ayuda-cerrar" onclick="cerrarAyuda()">×</button>
+        <div class="ayuda-titulo"><span>?</span> Inicio de sesión</div>
+        <ul class="ayuda-lista">
+            <li>Ingresa tu <strong>ID</strong> — el número asignado al registrarte.</li>
+            <li>Ingresa tu <strong>Contraseña</strong> — la que definiste al crear tu cuenta.</li>
+            <li>Si olvidaste tu contraseña, comunícate con un asesor para restablecerla.</li>
+            <li>Si eres cliente nuevo, haz clic en <strong>Regístrate aquí</strong> (visible solo en el rol Cliente).</li>
+        </ul>
+    </div>
+</div>
+<script>
+    function abrirAyuda()  { document.getElementById('ayuda-overlay').classList.add('abierto'); }
+    function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
+    function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
+</script>
+
+
+<!-- ── FormAlquilar.html ──────────────────────────────────── -->
+<button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
+<div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+    <div class="ayuda-modal">
+        <button class="ayuda-cerrar" onclick="cerrarAyuda()">×</button>
+        <div class="ayuda-titulo"><span>?</span> Alquiler de vehículo</div>
+        <ul class="ayuda-lista">
+            <li>Selecciona el <strong>asesor</strong> que te atendió en la empresa.</li>
+            <li>Haz clic en <strong>Fecha inicio</strong> para abrir el calendario y elige el día de recogida.</li>
+            <li>Los días <strong>tachados</strong> en el calendario ya están ocupados — no los puedes seleccionar.</li>
+            <li>Elige la <strong>Fecha fin</strong> — no puede ser antes que la fecha de inicio.</li>
+            <li>El <strong>total</strong> se calcula automáticamente en el servidor al confirmar.</li>
+            <li>Si completaste 5 alquileres previos, recibes un <strong>10% de descuento</strong> automático.</li>
+        </ul>
+    </div>
+</div>
+<script>
+    function abrirAyuda()  { document.getElementById('ayuda-overlay').classList.add('abierto'); }
+    function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
+    function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
+</script>
+
+
+<!-- ── registerVehiculo.html ─────────────────────────────── -->
+<button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
+<div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+    <div class="ayuda-modal">
+        <button class="ayuda-cerrar" onclick="cerrarAyuda()">×</button>
+        <div class="ayuda-titulo"><span>?</span> Gestión del inventario</div>
+        <ul class="ayuda-lista">
+            <li>Completa todos los campos para registrar un nuevo vehículo en el catálogo.</li>
+            <li>El <strong>Estado</strong> define si el vehículo aparece disponible para los clientes.</li>
+            <li>Un vehículo en <strong>Mantenimiento</strong> no puede ser alquilado hasta que cambies su estado.</li>
+            <li>Para <strong>editar</strong> un vehículo ve al inventario y selecciona la opción de actualizar.</li>
+            <li>No puedes <strong>eliminar</strong> un vehículo si tiene alquileres activos o programados.</li>
+            <li>La <strong>imagen</strong> se muestra en el catálogo que ven los clientes.</li>
+        </ul>
+    </div>
+</div>
+<script>
+    function abrirAyuda()  { document.getElementById('ayuda-overlay').classList.add('abierto'); }
+    function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
+    function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
+</script>

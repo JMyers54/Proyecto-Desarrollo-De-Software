@@ -17,7 +17,7 @@
     </header>
     <main>
         <section class="panel">
-            <h2>Bienvenido, Administrador</h2>
+            <h2>Bienvenido, {{ nombre }}</h2>
             <p>Desde aquí puedes gestionar empleados, vehículos y más.</p>
             <div class="acciones">
                 <a href="{{ url_for('registrar_form') }}" class="btn-crearEmpleado">Registrar Empleado</a>

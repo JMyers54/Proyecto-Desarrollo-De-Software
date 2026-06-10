@@ -9,7 +9,7 @@ from Application.Services.ServicesCliente import ServicesCliente
 from Application.Services.ServicesEmpleado import ServicesEmpleado
 import os
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, date
 
 app = Flask(__name__, template_folder='Presentation/templates', static_folder='Presentation/static')   
 app.secret_key = 'your_secret_key_here'  # Cambia esto por una clave secreta segura
@@ -65,19 +65,47 @@ def login_rol(rol):
 def admin():
     if 'admin' not in session:
         return redirect(url_for('login'))
-    return render_template('admin.html')
+    id_admin = session.get('admin')
+    nombre = admin_repo.ObtenerNombreAdmin(id_admin)
+    return render_template('admin.html', nombre=nombre)
 
 @app.route('/empleado')
 def empleado():
     if 'empleado' not in session:
         return redirect(url_for('login'))
-    return render_template('empleado.html')
+        
+    id_empleado = session.get('empleado')
+    # Usamos los métodos del repositorio
+    nombre_empleado = empleado_repo.ObtenerNombreEmpleado(id_empleado)
+    alquileres_asignados = empleado_repo.ObtenerHistorialAlquileres(id_empleado)
+    
+    return render_template('empleado.html', nombre=nombre_empleado, alquileres=alquileres_asignados)
+
+# === PASO 6: RUTA PARA PROCESAR LA DEVOLUCIÓN (RN-01) ===
+@app.route('/devolucion/<int:id_alquiler>')
+def registrar_devolucion(id_alquiler):
+    if 'empleado' not in session:
+        return redirect(url_for('login'))
+        
+    exito, mensaje = empleado_repo.RegistrarDevolucion(id_alquiler)
+    flash(mensaje) # Por si manejas mensajes flash en tu interfaz
+    return redirect(url_for('empleado'))
 
 @app.route('/cliente')
 def cliente():
     if 'cliente' not in session:
         return redirect(url_for('login'))
-    return render_template('cliente.html')
+    id_cliente = session.get('cliente')
+    nombre = cliente_repo.ObtenerNombreCliente(id_cliente)
+    alquileres_activos = cliente_repo.contar_alquileres_cliente(id_cliente)
+    # 1. Traemos todas las reservas de este cliente desde tu repositorio real
+    reservas_cliente = cliente_repo.ObtenerHistorialCliente(id_cliente)
+    # 2. Le pasamos las reservas y la fecha de hoy (en formato texto ISO: YYYY-MM-DD) al HTML
+    return render_template('cliente.html', 
+                            nombre=nombre, 
+                            alquileres_activos=alquileres_activos, 
+                            reservas=reservas_cliente, 
+                            hoy=date.today().isoformat())
 
 @app.route('/registrar_empleado')
 def registrar_form():
@@ -103,6 +131,33 @@ def registrar():
     else:
         return redirect(url_for('registrar_form'))
 
+def RegistrarCliente(self, Cedula, Nombre, Apellido, Telefono, Email, Contra, NumLicencia, FechaVencimientoLicencia):
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+
+            # Generar ID único automático
+            cursor.execute("SELECT COUNT(*) FROM CLIENTES")
+            total = cursor.fetchone()[0]
+            IdCliente = f"CL-{total + 1:03d}"   # CL-001, CL-002, ...
+
+            sql = """INSERT INTO CLIENTES 
+                        (ID_CLIENTE, CEDULA, NOMBRE, APELLIDO, TELEFONO, EMAIL, CONTRA, NUM_LICENCIA, FECHA_VENCIMIENTO_LICENCIA) 
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+            datos = (IdCliente, Cedula, Nombre, Apellido, Telefono, Email, Contra, NumLicencia, FechaVencimientoLicencia)
+            cursor.execute(sql, datos)
+            db.commit()
+            cursor.close()
+            conexion.CerrarConnection()
+            return True, "Cliente registrado con éxito"
+        except Exception as e:
+            return False, f"Error al registrar cliente: {e}"
+
+
+# ── ROUTES (reemplaza los 4 routes en app.py) ─────────────────────────────────
+
 @app.route("/registrar_cliente")
 def registrar_cliente():
     if "empleado" not in session:
@@ -113,19 +168,49 @@ def registrar_cliente():
 def registrar_clien():
     if "empleado" not in session:
         return redirect(url_for("login"))
-    IdCliente = request.form['IdCliente']
-    Cedula = request.form['Cedula']
-    Nombre = request.form['Nombre']
-    Apellido = request.form['Apellido']
-    Telefono = request.form['Telefono']
-    Email = request.form['Email']
-    Contra = request.form['Contra']
-    success, message = cliente_repo.RegistrarCliente(IdCliente,Cedula,Nombre,Apellido,Telefono,Email,Contra)
+    Cedula      = request.form['Cedula']
+    Nombre      = request.form['Nombre']
+    Apellido    = request.form['Apellido']
+    Telefono    = request.form['Telefono']
+    Email       = request.form['Email']
+    Contra      = request.form['Contra']
+    NumLicencia              = request.form['NumLicencia']
+    FechaVencimientoLicencia = request.form['FechaVencimientoLicencia']
+
+    success, message = cliente_repo.RegistrarCliente(
+        Cedula, Nombre, Apellido, Telefono, Email, Contra,
+        NumLicencia, FechaVencimientoLicencia
+    )
     flash(message)
     if success:
         return redirect(url_for("empleado"))
-    else: 
+    else:
         return redirect(url_for("registrar_cliente"))
+
+@app.route("/se_registrar_cliente")
+def cliente_se_registra():
+    return render_template("ClienteSeRegistra.html")   # sin verificar sesión: aún no tiene
+
+@app.route("/se_registrar_cliente", methods=["POST"])
+def cliente_registra():
+    Cedula      = request.form['Cedula']
+    Nombre      = request.form['Nombre']
+    Apellido    = request.form['Apellido']
+    Telefono    = request.form['Telefono']
+    Email       = request.form['Email']
+    Contra      = request.form['Contra']
+    NumLicencia              = request.form['NumLicencia']
+    FechaVencimientoLicencia = request.form['FechaVencimientoLicencia']
+
+    success, message = cliente_repo.RegistrarCliente(
+        Cedula, Nombre, Apellido, Telefono, Email, Contra,
+        NumLicencia, FechaVencimientoLicencia
+    )
+    flash(message)
+    if success:
+        return redirect(url_for("login_rol", rol="cliente"))   # va a hacer login con sus datos
+    else:
+        return redirect(url_for("cliente_se_registra"))
 
 @app.route("/registro_vehiculo", methods=["GET", "POST"])
 def registro_vehiculo():
@@ -164,6 +249,10 @@ def logout():
 @app.route('/inventario')
 def vista_inventario():
     return render_template('Inventario.html')
+
+@app.route('/empleado/inventario')
+def vista_inventario_empleado():
+    return render_template('InventarioEmpleado.html')
 
 @app.route('/api/vehiculos')
 def api_vehiculos():
@@ -242,9 +331,8 @@ def eliminar_vehiculo_api(idVehiculo):
 
 @app.route('/alquilar/Inventario', methods=['GET'])
 def vista_alquilar(): 
-    # Mantenemos tu consulta, idealmente esto debería pasar por un servicio en el futuro
     lista_carros = vehiculo_repo.obtener_todos_los_vehiculos()  
-    return render_template('alquilarVehiculo.html', vehiculos=lista_carros)
+    return render_template('alquilarVehiculo.html', vehiculos=lista_carros, fecha_hoy=date.today().isoformat())
 
 @app.route('/no_disponible')
 def form_no_disponible():
@@ -253,11 +341,16 @@ def form_no_disponible():
 @app.route('/alquilar/<int:idVehiculo>', methods=['GET', 'POST'])
 def VehiculoDisponible(idVehiculo):
     vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
-    lista_empleados = empleado_repo.obtener_asesores_disponibles()  # PASAMOS None PARA OBTENER TODOS LOS EMPLEADOS DISPONIBLES  
+    lista_empleados = empleado_repo.obtener_asesores_disponibles()
     return render_template('FormAlquilar.html', 
                             idVehiculo=idVehiculo, 
                             vehiculo=vehiculo, 
-                            lista_empleados=lista_empleados) # Evitamos confusiones de nombres
+                            lista_empleados=lista_empleados)
+
+@app.route('/api/vehiculos/<int:idVehiculo>/fechas_ocupadas')
+def fechas_ocupadas(idVehiculo):
+    rangos = vehiculo_repo.ObtenerFechasOcupadas(idVehiculo)
+    return jsonify(rangos)
 
 @app.route('/verificar_disponibilidad/<int:idVehiculo>', methods=['POST'])
 def verificar_disponibilidad(idVehiculo):
@@ -359,7 +452,7 @@ def confirmar_alquiler(idVehiculo):
     else:
         flash("Error interno al registrar el alquiler en la base de datos.")
         
-    return redirect(url_for('vista_inventario'))
+    return redirect(url_for('vista_alquilar'))
 
 @app.route('/api/empleado/estadisticas/<id_empleado>')
 def api_estadisticas_empleado(id_empleado):
@@ -375,9 +468,10 @@ def api_historial_cliente(id_cliente):
 def historial_cliente():
     if 'cliente' not in session:
         return redirect(url_for('login'))
+    from datetime import date
     id_cliente = session.get('cliente')
     historial = cliente_repo.ObtenerHistorialCliente(id_cliente)
-    return render_template('HistorialCliente.html', historial=historial)
+    return render_template('HistorialCliente.html', historial=historial, hoy=str(date.today()))
 
 @app.route('/dashboard')
 def dashboard():
@@ -436,5 +530,64 @@ def backup():
     except Exception as e:
         flash(f"Error al generar backup: {e}")
         return redirect(url_for('admin'))
+
+@app.route('/cancelar_alquiler/<int:id_alquiler>', methods=['POST'])
+def cancelar_alquiler(id_alquiler):
+    if 'cliente' not in session:
+        return redirect(url_for('login'))
+    id_cliente = session.get('cliente')
+    success, message = cliente_repo.CancelarAlquiler(id_alquiler, id_cliente)
+    flash(message)
+    return redirect(url_for('historial_cliente'))
+
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
+
+@app.route('/editar_alquiler/<int:id_alquiler>', methods=['POST'])
+def editar_alquiler(id_alquiler):
+    if 'cliente' not in session:
+        return redirect(url_for('login'))
+        
+    id_cliente = session.get('cliente')
+    nueva_fecha_inicio = request.form.get('fecha_inicio')
+    nueva_fecha_fin = request.form.get('fecha_fin')
+    
+    if nueva_fecha_inicio and nueva_fecha_fin:
+        f_inicio = datetime.strptime(nueva_fecha_inicio, '%Y-%m-%d')
+        f_fin = datetime.strptime(nueva_fecha_fin, '%Y-%m-%d')
+
+        fecha_hoy = datetime.combine(date.today(), datetime.min.time()) # Hoy a las 00:00
+        if f_inicio < fecha_hoy:
+            flash('Error: No puedes seleccionar una fecha de inicio anterior a hoy.')
+            return redirect(url_for('historial_cliente'))
+        
+        if f_inicio > f_fin:
+            flash('Error: La fecha de inicio no puede ser posterior a la fecha de fin.')
+            return redirect(url_for('historial_cliente'))
+            
+    try:
+        # Nos conectamos a la base de datos usando tu infraestructura ConexionDB
+        modelo.CrearConnection()
+        conn = modelo.getConnection()
+        cursor = conn.cursor()
+        
+        # Actualizamos las fechas del alquiler asegurando que pertenezca al cliente en sesión
+        sql = """
+            UPDATE ALQUILERES 
+            SET FECHA_INICIO = %s, FECHA_FIN = %s 
+            WHERE ID_ALQUILER = %s AND ID_CLIENTE = %s
+        """
+        cursor.execute(sql, (nueva_fecha_inicio, nueva_fecha_fin, id_alquiler, id_cliente))
+        conn.commit()
+        
+        cursor.close()
+        modelo.CerrarConnection()
+        
+        flash('¡Reserva modificada con éxito!')
+    except Exception as e:
+        flash(f'Error al modificar la reserva: {e}')
+        
+    return redirect(url_for('historial_cliente'))
 if __name__ == '__main__':
     app.run(debug=True)

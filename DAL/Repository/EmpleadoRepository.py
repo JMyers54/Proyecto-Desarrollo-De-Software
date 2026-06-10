@@ -1,23 +1,27 @@
 from DAL.Infrastructure.ConexionDB import ConexionDB
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class EmpleadoRepository():
     def __init__(self, vista, modelo):
         self.vista = vista
         self.modelo = modelo
 
-    def RegistrarEmpleado(self,IdEmpleado,Cedula,Nombre,Apellido,Telefono,Email,Contra):
+    def RegistrarEmpleado(self, IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, Contra):
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
+
+            contra_hash = generate_password_hash(Contra)
+
             sql = "INSERT INTO EMPLEADO (IDEMPLEADO,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-            datos =(IdEmpleado,Cedula,Nombre,Apellido,Telefono,Email,Contra)
+            datos = (IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, contra_hash)
             cursor.execute(sql, datos)
             db.commit()
             cursor.close()
             conexion.CerrarConnection()
-            return True, "empleado registrado con éxito"
+            return True, "Empleado registrado con éxito"
         except Exception as e:
             return False, f"Error al registrar empleado: {e}"
 
@@ -26,20 +30,18 @@ class EmpleadoRepository():
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
-
             with db.cursor() as cursor:
-                cursor.execute("SELECT Contra FROM empleado WHERE IDEMPLEADO = %s", (id,))
+                cursor.execute("SELECT CONTRA FROM empleado WHERE IDEMPLEADO = %s", (id,))
                 resultado = cursor.fetchone()
-            
             conexion.CerrarConnection()
             if resultado is None:
                 return False, "El id no está registrado."
-            if resultado[0] == contra:
+            if check_password_hash(resultado[0], contra):
                 return True, ""
-            else:
-                return False, "Contraseña Incorrecta."
+            return False, "Contraseña incorrecta."
         except Exception as e:
             return False, f"Error al iniciar sesión: {e}"
+
 
     def obtener_empleado(conn):
         cursor = conn.cursor()
@@ -154,3 +156,57 @@ class EmpleadoRepository():
                 print(f"ERROR CRÍTICO EN EMPLEADOREPOSITORY: {e}")
                 print("!"*40 + "\n")
                 return []
+    
+    def ObtenerNombreEmpleado(self, id_empleado):
+        """Devuelve el nombre completo del empleado logueado"""
+        try:
+            conexion = ConexionDB()
+            conexion.CrearConnection()
+            db = conexion.getConnection()
+            cursor = db.cursor()
+            cursor.execute("SELECT NOMBRE, APELLIDO FROM EMPLEADO WHERE IDEMPLEADO = %s", (id_empleado,))
+            res = cursor.fetchone()
+            cursor.close()
+            conexion.CerrarConnection()
+            return f"{res[0]} {res[1]}" if res else "Asesor"
+        except Exception as e:
+            print("Error al obtener nombre del empleado:", e)
+            return "Asesor"
+
+    def RegistrarDevolucion(self, id_alquiler):
+            """Paso 6: Borrado directo y liberación del vehículo en cascada manual"""
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                cursor = db.cursor()
+                
+                # 1. Primero sacamos el ID del vehículo antes de borrar la fila del alquiler
+                cursor.execute("SELECT ID_VEHICULO FROM ALQUILERES WHERE ID_ALQUILER = %s", (id_alquiler,))
+                resultado = cursor.fetchone()
+                
+                if resultado:
+                    id_vehiculo = resultado[0]
+                    print(f"--> [DEBUG]: Encontrado Alquiler #{id_alquiler}. Vehículo a liberar: {id_vehiculo}")
+                    
+                    # 2. Borramos el alquiler
+                    cursor.execute("DELETE FROM ALQUILERES WHERE ID_ALQUILER = %s", (id_alquiler,))
+                    
+                    # 3. Colocamos el carro disponible
+                    cursor.execute("UPDATE VEHICULOS SET ESTADO = 'Disponible' WHERE ID_VEHICULO = %s", (id_vehiculo,))
+                    
+                    db.commit()
+                    print("--> [DEBUG]: Commit realizado con éxito en la base de datos.")
+                    
+                    cursor.close()
+                    conexion.CerrarConnection()
+                    return True, "Devolución procesada."
+                else:
+                    print(f"--> [DEBUG]: No se encontró ningún alquiler con el ID {id_alquiler}")
+                    
+                cursor.close()
+                conexion.CerrarConnection()
+                return False, "No se encontró el alquiler."
+            except Exception as e:
+                print("--> [ERROR CRÍTICO EN DEVOLUCIÓN]:", e)
+                return False, f"Error: {e}"

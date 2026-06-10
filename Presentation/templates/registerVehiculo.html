@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Vehiculo - Alquiler de Vehículos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ayuda.css') }}">
 </head>
 
 <body>
@@ -81,6 +82,29 @@
             <a href="/admin">Volver al Panel</a>
         </div>
     </div>
+
+    <!-- AYUDA CONTEXTUAL -->
+    <button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
+    <div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+        <div class="ayuda-modal">
+            <button class="ayuda-cerrar" onclick="cerrarAyuda()">×</button>
+            <div class="ayuda-titulo"><span>?</span> Gestión del inventario</div>
+            <ul class="ayuda-lista">
+                <li>Completa todos los campos para registrar un nuevo vehículo en el catálogo.</li>
+                <li>El <strong>Estado</strong> define si el vehículo aparece disponible para los clientes.</li>
+                <li>Un vehículo en <strong>Mantenimiento</strong> no puede ser alquilado hasta que cambies su estado.</li>
+                <li>Para <strong>editar</strong> un vehículo ve al inventario y selecciona la opción de actualizar.</li>
+                <li>No puedes <strong>eliminar</strong> un vehículo si tiene alquileres activos o programados.</li>
+                <li>La <strong>imagen</strong> se muestra en el catálogo que ven los clientes.</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        function abrirAyuda()  { document.getElementById('ayuda-overlay').classList.add('abierto'); }
+        function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
+        function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
+    </script>
+
 </body>
 
 </html>

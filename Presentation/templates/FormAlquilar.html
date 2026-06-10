@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alquilar Vehículo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ayuda.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <div class="registro-box-container">
@@ -32,12 +34,10 @@
                     <label>Vehículo</label>
                     <input type="text" value="{{ vehiculo[0] }} {{ vehiculo[1] }}" disabled>
                 </div>
-
                 <div class="grupo-campo ancho-completo">
                     <label for="IdEmpleado">Asesor que lo atendió</label>
-                        <select name="IdEmpleado" id="id_empleado" required>
-                            <option value="">Seleccione un asesor...</option>
-
+                    <select name="IdEmpleado" id="id_empleado" required>
+                        <option value="">Seleccione un asesor...</option>
                         {% for empleado in lista_empleados %}
                             <option value="{{ empleado[0] }}">
                                 {{ empleado[1] }} {{ empleado[2] }}
@@ -48,20 +48,78 @@
 
                 <div class="grupo-campo">
                     <label for="fecha_inicio">Fecha inicio</label>
-                    <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+                    <input type="text" id="fecha_inicio" name="fecha_inicio" placeholder="Selecciona fecha" readonly required>
                 </div>
+
                 <div class="grupo-campo">
                     <label for="fecha_fin">Fecha fin</label>
-                    <input type="date" id="fecha_fin" name="fecha_fin" required>
+                    <input type="text" id="fecha_fin" name="fecha_fin" placeholder="Selecciona fecha" readonly required>
                 </div>
-                
+
                 <input type="hidden" name="idVehiculo" value="{{ idVehiculo }}">
-                <button type="submit" class="btn-registrar-box ancho-completo"> Confirmar alquiler </button>
+                <button type="submit" class="btn-registrar-box ancho-completo">Confirmar alquiler</button>
             </div>
         </form>
+
         <div class="link-retorno-box">
             <a href="/alquilar/Inventario">Volver al catálogo</a>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        const idVehiculo = {{ idVehiculo }};
+
+        fetch(`/api/vehiculos/${idVehiculo}/fechas_ocupadas`)
+            .then(r => r.json())
+            .then(rangos => {
+                const deshabilitadas = rangos.map(r => ({
+                    from: r.FECHA_INICIO,
+                    to:   r.FECHA_FIN
+                }));
+
+                const pickerInicio = flatpickr("#fecha_inicio", {
+                    minDate:    "today",
+                    disable:    deshabilitadas,
+                    dateFormat: "Y-m-d",
+                    locale:     { firstDayOfWeek: 1 },
+                    onChange: function(selectedDates) {
+                        if (selectedDates[0]) {
+                            pickerFin.set('minDate', selectedDates[0]);
+                        }
+                    }
+                });
+
+                const pickerFin = flatpickr("#fecha_fin", {
+                    minDate:    "today",
+                    disable:    deshabilitadas,
+                    dateFormat: "Y-m-d",
+                    locale:     { firstDayOfWeek: 1 }
+                });
+            });
+    </script>
+
+    <!-- AYUDA CONTEXTUAL -->
+    <button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
+    <div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+        <div class="ayuda-modal">
+            <button class="ayuda-cerrar" onclick="cerrarAyuda()">×</button>
+            <div class="ayuda-titulo"><span>?</span> Alquiler de vehículo</div>
+            <ul class="ayuda-lista">
+                <li>Selecciona el <strong>asesor</strong> que te atendió en la empresa.</li>
+                <li>Haz clic en <strong>Fecha inicio</strong> para abrir el calendario y elige el día de recogida.</li>
+                <li>Los días <strong>tachados</strong> en el calendario ya están ocupados — no los puedes seleccionar.</li>
+                <li>Elige la <strong>Fecha fin</strong> — no puede ser antes que la fecha de inicio.</li>
+                <li>El <strong>total</strong> se calcula automáticamente en el servidor al confirmar.</li>
+                <li>Si completaste 5 alquileres previos, recibes un <strong>10% de descuento</strong> automático.</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        function abrirAyuda()  { document.getElementById('ayuda-overlay').classList.add('abierto'); }
+        function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
+        function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
+    </script>
+
 </body>
-</html>
+</html> 

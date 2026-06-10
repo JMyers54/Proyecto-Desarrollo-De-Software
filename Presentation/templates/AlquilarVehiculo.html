@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Alquiler</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
@@ -16,47 +15,80 @@
             <a href="/cliente" class="btn-volver">Volver al panel</a>
         </nav>
     </header>
+
+    <div class="toolbar-filtros">
+        <!-- Filtro por Marca -->
+        <div class="grupo-filtro">
+            <label for="filtro-marca">Buscar por Marca</label>
+            <input type="text" id="filtro-marca" oninput="filtrarCatalogo()" placeholder="Ej: Toyota, Mazda...">
+        </div>
+
+        <!-- Filtro por Precio Máximo -->
+        <div class="grupo-filtro">
+            <label for="filtro-precio">Precio Máximo por Día (COP)</label>
+            <input type="number" id="filtro-precio" oninput="filtrarCatalogo()" placeholder="Cualquier precio">
+        </div>
+        
+    </div>
+
     <div class="catalogo-container">
         {% for vehiculo in vehiculos %}
-        <div class="tarjeta-vehiculo">
+        <div class="tarjeta-vehiculo item-vehiculo" 
+                data-marca="{{ vehiculo.MARCA | lower }}" 
+                data-precio="{{ vehiculo.PRECIO_POR_DIA }}" 
+                data-estado="{{ vehiculo.ESTADO }}">
 
             <div class="imagen-box">
                 <img src="{{ url_for('static', filename='uploads/' ~ vehiculo.IMAGEN) }}"
                     alt="{{ vehiculo.MARCA }} {{ vehiculo.MODELO }}">
-
-                <span
-                    class="badge-estado {% if vehiculo.ESTADO == 'Disponible' %}disponible{% else %}reservado{% endif %}">
-                    {{ vehiculo.Estado | upper }}
+                <span class="badge-estado {% if vehiculo.ESTADO == 'Disponible' %}disponible{% else %}reservado{% endif %}">
+                    {{ vehiculo.ESTADO | upper }}
                 </span>
             </div>
 
             <div class="info-box">
-                <h3>{{ vehiculo.Tipo }} {{ vehiculo.Marca }} {{ vehiculo.Modelo }}</h3>
-                <p class="detalles-tecnicos">Año: {{ vehiculo.Aaño }} • Transmisión estándar</p>
+                <h3>{{ vehiculo.TIPO }} {{ vehiculo.MARCA }} {{ vehiculo.MODELO }}</h3>
+                <p class="detalles-tecnicos">Año: {{ vehiculo.AÑO }} • Transmisión estándar</p>
 
                 <div class="precio-box">
                     <span class="label-precio">Precio por día:</span>
-                    <span class="monto-precio">${{ "{:,.0f}".format(vehiculo.PRECIO_POR_DIA)}} COP</span>
+                    <span class="monto-precio">${{ "{:,.0f}".format(vehiculo.PRECIO_POR_DIA) }} COP</span>
                 </div>
 
-                <form method="post" action="/verificar_disponibilidad/{{ vehiculo.ID_VEHICULO }}">
-                    <label for="fecha_consulta_{{ vehiculo.ID_VEHICULO }}">VERIFICAR DISPONIBILIDAD:</label>
-                    <div class="input-fecha-wrapper">
-                        <label for="fecha_inicio_{{ vehiculo.ID_VEHICULO }}">Fecha Inicio:</label>
-                        <input type="date" name="fecha_inicio" required>
-                    </div>
-                    <div class="input-fecha-wrapper" style="margin-top:10px;">
-                        <label for="fecha_fin_{{ vehiculo.ID_VEHICULO }}">Fecha Fin:</label>
-                        <input type="date" name="fecha_fin" required>
-                    </div>
-                    <button type="submit" class="btn-consultar">Consultar Fecha</button>
-                </form>
+                <a href="/alquilar/{{ vehiculo.ID_VEHICULO }}" class="btn-consultar">Alquilar</a>
             </div>
 
         </div>
         {% endfor %}
     </div>
 
+        <script>
+                function filtrarCatalogo() {
+                    // 1. Capturar los valores actuales de los dos filtros
+                    const marcaBuscada = document.getElementById('filtro-marca').value.toLowerCase().trim();
+                    const precioMaximo = parseFloat(document.getElementById('filtro-precio').value) || Infinity;
+
+                    // 2. Traer todas las tarjetas de vehículos de la pantalla
+                    const tarjetas = document.querySelectorAll('.item-vehiculo');
+
+                    tarjetas.forEach(tarjeta => {
+                        // Leer las propiedades guardadas en los atributos "data-"
+                        const marcaVehiculo = tarjeta.getAttribute('data-marca') || '';
+                        const precioVehiculo = parseFloat(tarjeta.getAttribute('data-precio')) || 0;
+
+                        // 3. Evaluar las 2 condiciones simultáneamente
+                        const cumpleMarca = marcaVehiculo.includes(marcaBuscada);
+                        const cumplePrecio = precioVehiculo <= precioMaximo;
+
+                        // Mostrar u ocultar la tarjeta según el resultado
+                        if (cumpleMarca && cumplePrecio) {
+                            tarjeta.style.display = ''; // Se ve normal
+                        } else {
+                            tarjeta.style.display = 'none'; // Se oculta
+                        }
+                    });
+                }
+            </script>
 </body>
 
 </html>
