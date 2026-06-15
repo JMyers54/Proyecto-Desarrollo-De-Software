@@ -26,23 +26,26 @@ class ClienteRepository():
         except Exception as e:
             return False, f"Error al registrar cliente: {e}"
 
-    def verificarCliente(self, id, contra):
-        try:
-            conexion = ConexionDB()
-            conexion.CrearConnection()
-            db = conexion.getConnection()
-            with db.cursor() as cursor:
-                cursor.execute("SELECT CONTRA FROM clientes WHERE ID_CLIENTE = %s", (id,))
-                resultado = cursor.fetchone()
-            conexion.CerrarConnection()
-            if resultado is None:
-                return False, "El id no está registrado."
-            if check_password_hash(resultado[0], contra):
-                return True, ""
-            return False, "Contraseña incorrecta."
-        except Exception as e:
-            return False, f"Error al iniciar sesión: {e}"
-
+    def verificarCliente(self, cedula, contra):
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                with db.cursor() as cursor:
+                    # Cambiamos la consulta para buscar por CEDULA en la tabla clientes
+                    cursor.execute("SELECT CONTRA FROM clientes WHERE CEDULA = %s", (cedula,))
+                    resultado = cursor.fetchone()
+                conexion.CerrarConnection()
+                
+                if resultado is None:
+                    return False, "La cédula no está registrada."
+                
+                if check_password_hash(resultado[0], contra):
+                    return True, ""
+                
+                return False, "Contraseña incorrecta."
+            except Exception as e:
+                return False, f"Error al iniciar sesión: {e}"
     def obtener_clientes(conn):
         cursor = conn.cursor()
         cursor.execute("""
@@ -228,13 +231,13 @@ class ClienteRepository():
             print("Error dashboard:", e)
             return {"vehiculos": [], "clientes": [], "asesores": []}
     
-    def ObtenerNombreCliente(self, id_cliente):
+    def ObtenerNombreCliente(self, Cedula):
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
             with db.cursor() as cursor:
-                cursor.execute("SELECT NOMBRE, APELLIDO FROM CLIENTES WHERE ID_CLIENTE = %s", (id_cliente,))
+                cursor.execute("SELECT NOMBRE, APELLIDO FROM CLIENTES WHERE CEDULA = %s", (Cedula,))
                 fila = cursor.fetchone()
             conexion.CerrarConnection()
             if fila:

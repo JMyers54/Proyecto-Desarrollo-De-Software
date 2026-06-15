@@ -14,6 +14,19 @@
         </nav>
     </header>
     <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div style="margin-bottom: 20px;">
+                {% for category, message in messages %}
+                {% if category == 'cancelacion' %}
+                    <div style="background: rgba(46, 204, 113, 0.15); border: 1px solid #2ecc71; color: #2ecc71; padding: 12px; border-radius: 6px; text-align: center; font-weight: bold;">
+                        {{ message }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <div class="panel">
             {% if historial %}
             <table style="width:100%; border-collapse:collapse; font-size:14px;">

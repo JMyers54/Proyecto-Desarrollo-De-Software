@@ -5,14 +5,14 @@ class VehiculoRepository():
         self.vista = vista
         self.modelo = modelo
 
-    def RegistroVehiculos(self,Marca, Modelo, Año, Tipo, Precio_diario, Estado, nombre_imagen):
+    def RegistroVehiculos(self,Marca, Placa, Modelo, Año, Tipo, Precio_diario, Estado, nombre_imagen):
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
-            sql = "INSERT INTO VEHICULOS (MARCA, MODELO, AÑO, TIPO, PRECIO_POR_DIA, ESTADO, IMAGEN) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-            datos = (Marca, Modelo, Año, Tipo, Precio_diario, Estado, nombre_imagen)
+            sql = "INSERT INTO VEHICULOS (MARCA, PLACA, MODELO, AÑO, TIPO, PRECIO_POR_DIA, ESTADO, IMAGEN) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            datos = (Marca, Placa, Modelo, Año, Tipo, Precio_diario, Estado, nombre_imagen)
             cursor.execute(sql, datos)
             db.commit()
             cursor.close()

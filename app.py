@@ -9,10 +9,12 @@ from Application.Services.ServicesCliente import ServicesCliente
 from Application.Services.ServicesEmpleado import ServicesEmpleado
 import os
 from werkzeug.utils import secure_filename
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+
 
 app = Flask(__name__, template_folder='Presentation/templates', static_folder='Presentation/static')   
 app.secret_key = 'your_secret_key_here'  # Cambia esto por una clave secreta segura
+app.permanent_session_lifetime = timedelta(minutes=30)  # Sesión expira después de 30 minutos de inactividad
 
 modelo = ConexionDB()
 admin_repo = AdminRepository(None, modelo)
@@ -22,6 +24,7 @@ vehiculo_repo = VehiculoRepository(None, modelo)
 vehiculo_service = ServicesVehiculos(modelo)
 empleado_service = ServicesEmpleado(modelo)
 cliente_service = ServicesCliente(modelo)
+
 @app.route('/')
 def index():
     lista_carros = vehiculo_repo.obtener_todos_los_vehiculos()
@@ -41,16 +44,19 @@ def login_rol(rol):
         if rol == 'admin':
             success, message = admin_repo.IniciarSesionAdmin(id_user, contra)
             if success:
+                session.permanent = True  # La sesión se mantendrá activa según el tiempo definido en app.permanent_session_lifetime
                 session['admin'] = id_user
                 return redirect(url_for('admin'))
         elif rol == 'empleado':
             success, message = empleado_repo.verificarEmpleado(id_user, contra)
             if success:
+                session.permanent = True  # La sesión se mantendrá activa según el tiempo definido en app.permanent_session_lifetime
                 session['empleado'] = id_user
                 return redirect(url_for('empleado'))
         elif rol == 'cliente':
             success, message = cliente_repo.verificarCliente(id_user, contra)
             if success:
+                session.permanent = True  # La sesión se mantendrá activa según el tiempo definido en app.permanent_session_lifetime
                 session['cliente'] = id_user
                 return redirect(url_for('cliente'))
         else:
@@ -117,14 +123,13 @@ def registrar_form():
 def registrar():
     if 'admin' not in session:
         return redirect(url_for('login'))
-    IdEmpleado = request.form['IdEmpleado']
     Cedula = request.form['Cedula']
     Nombre = request.form['Nombre']
     Apellido = request.form['Apellido']
     Telefono = request.form['Telefono']
     Email = request.form['Email']
     Contra = request.form['Contra']
-    success, message = empleado_repo.RegistrarEmpleado(IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, Contra)
+    success, message = empleado_repo.RegistrarEmpleado(Cedula, Nombre, Apellido, Telefono, Email, Contra)
     flash(message)
     if success:
         return redirect(url_for('admin'))
@@ -218,6 +223,7 @@ def registro_vehiculo():
         return redirect(url_for("login"))
     if request.method == "POST":
         Marca = request.form["Marca"]
+        Placa = request.form["Placa"]
         Modelo = request.form["Modelo"]
         Año = request.form["Año"]
         Tipo = request.form["Tipo"]
@@ -231,7 +237,7 @@ def registro_vehiculo():
             os.makedirs(carpeta_uploads, exist_ok=True)
             ruta_imagen = os.path.join(carpeta_uploads,nombre_final_imagen)
             archivo_foto.save(ruta_imagen)
-        success, message = vehiculo_repo.RegistroVehiculos( Marca, Modelo, Año, Tipo, Precio_diario, Estado, nombre_final_imagen)
+        success, message = vehiculo_repo.RegistroVehiculos( Marca, Placa, Modelo, Año, Tipo, Precio_diario, Estado, nombre_final_imagen)
         flash(message)
         if success:
             return redirect(url_for("admin"))
@@ -361,20 +367,20 @@ def verificar_disponibilidad(idVehiculo):
     id_cliente = session.get('cliente')
     fecha_inicio = request.form['fecha_inicio']
     fecha_fin = request.form['fecha_fin']
+    
     # IMPORTANTE: Recargar los datos del vehículo y asesores por si hay que redibujar la página por un error
     vehiculo = vehiculo_repo.ObtenerVehiculoPorId(idVehiculo)
-    lista_asesores = empleado_repo.obtener_asesores_disponibles()  # PASAMOS EL ID DEL EMPLEADO SELECCIONADO PARA EXCLUIRLO DE LA LISTA DE ASESORES DISPONIBLES
+    lista_asesores = empleado_repo.obtener_asesores_disponibles()
+    
     # 1. Validar orden de las fechas
     if fecha_inicio > fecha_fin:
         flash("La fecha de inicio no puede ser posterior a la fecha de fin.")
-        # AQUÍ ESTABA EL ERROR: Se debe enviar 'lista_empleados=lista_asesores' si volvemos a pintar el formulario
         return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo, lista_empleados=lista_asesores)
         
     # 2. Verificar disponibilidad real en la base de datos
     coincidencias = vehiculo_repo.VerificarDisponibilidad(idVehiculo, fecha_inicio, fecha_fin)
     if coincidencias > 0:
         flash("El vehículo no está disponible para las fechas seleccionadas. Por favor, elige otro rango.")
-        # AQUÍ TAMBIÉN: Se debe re-enviar la lista de empleados
         return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo, lista_empleados=lista_asesores)
         
     # 3. Si todo está correcto, proceder al cálculo del precio total
@@ -393,13 +399,24 @@ def verificar_disponibilidad(idVehiculo):
     dias = (fin - inicio).days + 1
     total = dias * precio_dia
     
+    # Control local de la alerta del descuento para evitar que flote en cualquier parte
+    tiene_descuento = False
     cantidad_alquileres = cliente_repo.contar_alquileres_cliente(id_cliente)
-    if cantidad_alquileres == 5:
+    if cantidad_alquileres > 0 and cantidad_alquileres % 5 == 0:  # Cada 5 alquileres, el próximo tiene descuento
         total = total * 0.90
-        flash("¡Felicidades! Tienes un 10% de descuento automático por tu sexto alquiler.")
-    # Avanza a la pantalla de confirmación final
-    return render_template('FormAlquilar.html', idVehiculo=idVehiculo, vehiculo=vehiculo, fecha_inicio=fecha_inicio, 
-                            fecha_fin=fecha_fin,dias=dias, total=total,lista_empleados=lista_asesores)
+        tiene_descuento = True
+        # Eliminamos el flash genérico para evitar que se pinte de manera global y rompa la experiencia
+    
+    # Avanza a la pantalla de confirmación final enviando los parámetros exactos que el HTML necesita
+    return render_template('FormAlquilar.html', 
+                           idVehiculo=idVehiculo, 
+                           vehiculo=vehiculo, 
+                           fecha_inicio=fecha_inicio, 
+                           fecha_fin=fecha_fin, 
+                           dias=dias, 
+                           total=total, 
+                           lista_empleados=lista_asesores,
+                           tiene_descuento=tiene_descuento)
 @app.route('/confirmar_alquiler/<int:idVehiculo>', methods=['POST'])
 def confirmar_alquiler(idVehiculo):
     print(dict(request.form))
@@ -441,7 +458,7 @@ def confirmar_alquiler(idVehiculo):
     
     # Aplicar el descuento en el backend también
     cantidad_alquileres = cliente_repo.contar_alquileres_cliente(id_cliente)
-    if cantidad_alquileres == 5:
+    if cantidad_alquileres > 0 and cantidad_alquileres % 5 == 0:
         total_servidor = total_servidor * 0.90
         
     # Guardamos DEFINITIVAMENTE con el precio verificado por el servidor
@@ -535,9 +552,15 @@ def backup():
 def cancelar_alquiler(id_alquiler):
     if 'cliente' not in session:
         return redirect(url_for('login'))
+        
     id_cliente = session.get('cliente')
+    # Tu lógica de repositorio
     success, message = cliente_repo.CancelarAlquiler(id_alquiler, id_cliente)
-    flash(message)
+    
+    # Categoría 'exito' o 'error' para filtrar en el HTML
+    categoria = 'exito' if success else 'error'
+    flash(message, categoria)
+    
     return redirect(url_for('historial_cliente'))
 
 @app.route('/faq')

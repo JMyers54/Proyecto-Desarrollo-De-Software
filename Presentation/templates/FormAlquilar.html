@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='ayuda.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 </head>
 <body>
     <div class="registro-box-container">
@@ -18,9 +19,9 @@
             <ul style="padding: 0; margin: 0;">
                 {% for message in messages %}
                     {% if 'éxito' in message or 'Felicidades' in message %}
-                        <li class="alerta-item alerta-exito">{{ message }}</li>
+                        <li class="alerta-item alerta-exito" style="list-style:none; background:#2ecc71; color:#fff; padding:10px; border-radius:6px; margin-bottom:8px;">{{ message }}</li>
                     {% else %}
-                        <li class="alerta-item alerta-error">{{ message }}</li>
+                        <li class="alerta-item alerta-error" style="list-style:none; background:#e74c3c; color:#fff; padding:10px; border-radius:6px; margin-bottom:8px;">{{ message }}</li>
                     {% endif %}
                 {% endfor %}
             </ul>
@@ -28,18 +29,35 @@
         {% endif %}
         {% endwith %}
 
-        <form method="POST" action="/confirmar_alquiler/{{ idVehiculo }}">
+        {% if total is defined %}
+        <div class="resumen-cotizacion" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: var(--primary);">Resumen de Cotización</h3>
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Días totales:</strong> {{ dias }}</p>
+            
+            {% if tiene_descuento or (total_servidor is defined and 'Felicidades' in messages|string) or (mensaje_descuento) %}
+            <div class="alerta-descuento-local" style="background: rgba(46, 204, 113, 0.15); border: 1px solid #2ecc71; color: #2ecc71; padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+                <i class="ti ti-percentage" style="font-size: 16px;"></i>
+                <span>¡Felicidades! Tienes un 10% de descuento automático por tu sexto alquiler.</span>
+            </div>
+            {% endif %}
+
+            <p style="margin: 5px 0; font-size: 16px;"><strong>Total a pagar:</strong> <span style="color: #2ecc71; font-weight: bold; font-size: 18px;">${{ "{:,.0f}".format(total) }}</span></p>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% if total is defined %}/confirmar_alquiler/{{ idVehiculo }}{% else %}/verificar_disponibilidad/{{ idVehiculo }}{% endif %}">
             <div class="formulario-grid-interno">
                 <div class="grupo-campo ancho-completo">
                     <label>Vehículo</label>
-                    <input type="text" value="{{ vehiculo[0] }} {{ vehiculo[1] }}" disabled>
+                    <input type="text" value="{% if vehiculo is mapping %}{{ vehiculo.get('Marca','') }} {{ vehiculo.get('Modelo','') }}{% else %}{{ vehiculo[0] }} {{ vehiculo[1] }}{% endif %}" disabled>
                 </div>
+                
                 <div class="grupo-campo ancho-completo">
                     <label for="IdEmpleado">Asesor que lo atendió</label>
                     <select name="IdEmpleado" id="id_empleado" required>
                         <option value="">Seleccione un asesor...</option>
                         {% for empleado in lista_empleados %}
-                            <option value="{{ empleado[0] }}">
+                            <option value="{{ empleado[0] }}" {% if request.form.get('IdEmpleado') == empleado[0]|string %}selected{% endif %}>
                                 {{ empleado[1] }} {{ empleado[2] }}
                             </option>
                         {% endfor %}
@@ -48,16 +66,24 @@
 
                 <div class="grupo-campo">
                     <label for="fecha_inicio">Fecha inicio</label>
-                    <input type="text" id="fecha_inicio" name="fecha_inicio" placeholder="Selecciona fecha" readonly required>
+                    <input type="text" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio or request.form.get('fecha_inicio','') }}" placeholder="Selecciona fecha" readonly required>
                 </div>
 
                 <div class="grupo-campo">
                     <label for="fecha_fin">Fecha fin</label>
-                    <input type="text" id="fecha_fin" name="fecha_fin" placeholder="Selecciona fecha" readonly required>
+                    <input type="text" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin or request.form.get('fecha_fin','') }}" placeholder="Selecciona fecha" readonly required>
                 </div>
 
                 <input type="hidden" name="idVehiculo" value="{{ idVehiculo }}">
-                <button type="submit" class="btn-registrar-box ancho-completo">Confirmar alquiler</button>
+                
+                {% if total is defined %}
+                    <button type="submit" class="btn-registrar-box ancho-completo" style="background:#2ecc71;">Confirmar y Registrar Alquiler</button>
+                    <div class="ancho-completo" style="text-align: center; margin-top: 10px;">
+                        <a href="/alquilar/{{ idVehiculo }}" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">Recalcular Fechas</a>
+                    </div>
+                {% else %}
+                    <button type="submit" class="btn-registrar-box ancho-completo">Calcular Total y Verificar</button>
+                {% endif %}
             </div>
         </form>
 
@@ -99,7 +125,6 @@
             });
     </script>
 
-    <!-- AYUDA CONTEXTUAL -->
     <button class="btn-ayuda" onclick="abrirAyuda()" title="Ayuda">?</button>
     <div class="ayuda-overlay" id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
         <div class="ayuda-modal">
@@ -110,8 +135,8 @@
                 <li>Haz clic en <strong>Fecha inicio</strong> para abrir el calendario y elige el día de recogida.</li>
                 <li>Los días <strong>tachados</strong> en el calendario ya están ocupados — no los puedes seleccionar.</li>
                 <li>Elige la <strong>Fecha fin</strong> — no puede ser antes que la fecha de inicio.</li>
-                <li>El <strong>total</strong> se calcula automáticamente en el servidor al confirmar.</li>
-                <li>Si completaste 5 alquileres previos, recibes un <strong>10% de descuento</strong> automático.</li>
+                <li>Al presionar el botón, el sistema simulará el costo en el servidor.</li>
+                <li>Si completaste 5 alquileres previos, verás reflejado el <strong>10% de descuento</strong> automático antes de guardar.</li>
             </ul>
         </div>
     </div>
@@ -120,6 +145,5 @@
         function cerrarAyuda() { document.getElementById('ayuda-overlay').classList.remove('abierto'); }
         function cerrarAyudaOverlay(e) { if (e.target.id === 'ayuda-overlay') cerrarAyuda(); }
     </script>
-
 </body>
-</html> 
+</html>

@@ -94,6 +94,12 @@ main {
     width: 245px;
     text-align: center;
     font-size: 13px;
+    /* Solo aparece cuando hay contenido */
+    display: none;
+}
+
+.flash-messages:not(:empty) {
+    display: block;
 }
 
 .flash-messages p {
@@ -1036,7 +1042,6 @@ main {
     color: #fff;
     border-color: #888;
 }
-
 .flash-mensaje-box {
     background-color: rgba(255, 204, 204, 0.1);
     color: #ffcccc;
@@ -1045,6 +1050,11 @@ main {
     border: 1px solid rgba(255, 204, 204, 0.15);
     margin-bottom: 20px;
     font-size: 13px;
+    display: none;
+}
+
+.flash-mensaje-box:not(:empty) {
+    display: block;
 }
 
 .flash-mensaje-box ul {

@@ -6,36 +6,40 @@ class EmpleadoRepository():
         self.vista = vista
         self.modelo = modelo
 
-    def RegistrarEmpleado(self, IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, Contra):
-        try:
-            conexion = ConexionDB()
-            conexion.CrearConnection()
-            db = conexion.getConnection()
-            cursor = db.cursor()
+    def RegistrarEmpleado(self, Cedula, Nombre, Apellido, Telefono, Email, Contra):
+            try:
+                conexion = ConexionDB()
+                conexion.CrearConnection()
+                db = conexion.getConnection()
+                cursor = db.cursor()
 
-            contra_hash = generate_password_hash(Contra)
+                cursor.execute("SELECT COALESCE(MAX(IDEMPLEADO), 0) FROM EMPLEADO")
+                ultimo = int(cursor.fetchone()[0])
+                IdEmpleado = ultimo + 1
 
-            sql = "INSERT INTO EMPLEADO (IDEMPLEADO,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-            datos = (IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, contra_hash)
-            cursor.execute(sql, datos)
-            db.commit()
-            cursor.close()
-            conexion.CerrarConnection()
-            return True, "Empleado registrado con éxito"
-        except Exception as e:
-            return False, f"Error al registrar empleado: {e}"
+                contra_hash = generate_password_hash(Contra)
 
-    def verificarEmpleado(self, id, contra):
+                sql = "INSERT INTO EMPLEADO (IDEMPLEADO,CEDULA,NOMBRE,APELLIDO,TELEFONO,EMAIL,CONTRA) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+                datos = (IdEmpleado, Cedula, Nombre, Apellido, Telefono, Email, contra_hash)
+                cursor.execute(sql, datos)
+                db.commit()
+                cursor.close()
+                conexion.CerrarConnection()
+                return True, "Empleado registrado con éxito"
+            except Exception as e:
+                return False, f"Error al registrar empleado: {e}"
+
+    def verificarEmpleado(self, Cedula, contra):
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
             with db.cursor() as cursor:
-                cursor.execute("SELECT CONTRA FROM empleado WHERE IDEMPLEADO = %s", (id,))
+                cursor.execute("SELECT CONTRA FROM empleado WHERE CEDULA = %s", (Cedula,))
                 resultado = cursor.fetchone()
             conexion.CerrarConnection()
             if resultado is None:
-                return False, "El id no está registrado."
+                return False, "La cédula no está registrada."
             if check_password_hash(resultado[0], contra):
                 return True, ""
             return False, "Contraseña incorrecta."
@@ -157,14 +161,14 @@ class EmpleadoRepository():
                 print("!"*40 + "\n")
                 return []
     
-    def ObtenerNombreEmpleado(self, id_empleado):
+    def ObtenerNombreEmpleado(self, Cedula):
         """Devuelve el nombre completo del empleado logueado"""
         try:
             conexion = ConexionDB()
             conexion.CrearConnection()
             db = conexion.getConnection()
             cursor = db.cursor()
-            cursor.execute("SELECT NOMBRE, APELLIDO FROM EMPLEADO WHERE IDEMPLEADO = %s", (id_empleado,))
+            cursor.execute("SELECT NOMBRE, APELLIDO FROM EMPLEADO WHERE CEDULA = %s", (Cedula,))
             res = cursor.fetchone()
             cursor.close()
             conexion.CerrarConnection()
